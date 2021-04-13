@@ -66,3 +66,25 @@ class Records(BaseResource):
             q=query,
             **query_params,
         )
+
+    def delete(self, record_id: str, reason: str = None, event_type: str = None):
+        """Delete a record.
+
+        Args:
+            record_id: The ID of the record to remove.
+                It can be either a MediaObjectId, FragmentId or RecordId.
+            reason: The reason to delete the record.
+            event_type: A custom subtype for the delete event.
+        """
+
+        # Construct the optional body
+        body = {}
+        if reason:
+            body["reason"] = reason
+        if event_type:
+            body["event_type"] = event_type
+
+        return self.mh_client._delete(
+            resource_path=self._construct_path(record_id),
+            **body,
+        )

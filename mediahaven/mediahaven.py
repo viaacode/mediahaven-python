@@ -130,6 +130,7 @@ class MediaHavenClient:
         of the response with the name "Result-Count".
 
         Args:
+            resource_path: The path of the resource.
             **query_params: The query string parameters.
 
         Returns:
@@ -164,6 +165,7 @@ class MediaHavenClient:
         """Execute a GET request and return the result information.
 
         Args:
+            resource_path: The path of the resource.
             accept_format: The "Accept" request header.
             **query_params: The query string parameters.
 
@@ -194,3 +196,33 @@ class MediaHavenClient:
         if accept_format == AcceptFormat.JSON:
             return response.json()
         return response.text
+
+    def _delete(self, resource_path: str, **body) -> bool:
+        """Execute a DELETE request.
+
+        Args:
+            resource_path: The path of the resource.
+            **body: The optional request body.
+
+        Returns:
+            True if successful.
+
+        Raises:
+            MediaHavenException: If the response has a status >= 400.
+        """
+        # The resource URL up until path
+        resource_url = urljoin(self.base_url_path, resource_path)
+
+        # Execute the request
+        response = self._execute_request(
+            **dict(method="DELETE", url=resource_url, files=body)
+        )
+
+        # Raise appropriate exception if HTTPError occurred
+        self._raise_mediahaven_exception_if_needed(response)
+
+        # Parse response information
+        if response.status_code == 204:
+            return True
+
+        return False
