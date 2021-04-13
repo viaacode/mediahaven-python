@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -6,7 +9,6 @@ from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2.rfc6749.errors import (
     CustomOAuth2Error,
     InvalidClientError,
-    MissingTokenError,
 )
 from requests_oauthlib import OAuth2Session
 
@@ -21,7 +23,24 @@ class RequestTokenError(Exception):
     """
 
     def __init__(self):
-        super().__init__("Error occurred when requesting a token")
+        super().__init__("Error occurred when requesting a token.")
+
+
+class RefreshTokenError(Exception):
+    """Raised when an error occurred during token request.
+
+    Abstracts the underlying OAuthlib2 errors.
+    """
+
+    def __init__(self):
+        super().__init__("Error occurred when refreshing a token.")
+
+
+class NoTokenError(Exception):
+    """Raised when a token has not been requested yet."""
+
+    def __init__(self):
+        super().__init__("Authorized access is needed. Request a token first.")
 
 
 class OAuth2Grant(ABC):
@@ -68,9 +87,7 @@ class OAuth2Grant(ABC):
             MissingTokenError: When a token has not yet been requested.
         """
         if not self.token:
-            raise MissingTokenError(
-                description="Authorized access is needed. Request a token first."
-            )
+            raise NoTokenError
         return OAuth2Session(client=self.client, token=self.token)
 
 
