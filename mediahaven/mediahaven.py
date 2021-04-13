@@ -105,7 +105,7 @@ class MediaHavenClient:
         else:
             return response
 
-    def _build_headers(self, accept_format: AcceptFormat) -> dict:
+    def _build_headers(self, accept_format: AcceptFormat = None) -> dict:
         headers = {}
         if accept_format:
             headers["Accept"] = accept_format.value
@@ -122,6 +122,41 @@ class MediaHavenClient:
         """
         params = urlencode(query_params, quote_via=urlquote) if query_params else None
         return params
+
+    def _head(self, resource_path: str, **query_params) -> int:
+        """Execute a HEAD request and return the result information.
+
+        A HEAD operation returns the amount of items of the resource in the header
+        of the response with the name "Result-Count".
+
+        Args:
+            **query_params: The query string parameters.
+
+        Returns:
+            The amount of items.
+
+        Raises:
+            MediaHavenException: If the response has a status >= 400.
+        """
+        # The resource URL up until path
+        resource_url = urljoin(self.base_url_path, resource_path)
+
+        # Get the query parameters in MH specific encoding
+        params = self._encode_query_params(**query_params)
+
+        # Construct the request headers
+        headers = self._build_headers()
+
+        # Execute the request
+        response = self._execute_request(
+            **dict(method="HEAD", url=resource_url, headers=headers, params=params)
+        )
+
+        # Raise appropriate exception if HTTPError occurred
+        self._raise_mediahaven_exception_if_needed(response)
+
+        # Parse response information
+        return int(response.headers["Result-Count"])
 
     def _get(
         self, resource_path: str, accept_format: AcceptFormat, **query_params

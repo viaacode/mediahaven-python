@@ -14,6 +14,20 @@ class Records(BaseResource):
         super().__init__(*args, **kwargs)
         self.name = "records"
 
+    def count(self, query: str) -> int:
+        """Counts the amount the records given a query string.
+
+        Args:
+            query: Free text search string.
+
+        Returns:
+            The amount of records.
+        """
+        return self.mh_client._head(
+            resource_path=self._construct_path(),
+            q=query,
+        )
+
     def get(
         self, record_id: str, accept_format=DEFAULT_ACCEPT_FORMAT
     ) -> Union[str, dict]:

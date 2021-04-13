@@ -82,3 +82,23 @@ class TestRecords:
         assert len(responses.calls) == 1
         assert responses.calls[0].request.url == url
         assert responses.calls[0].response.json() == resp_json
+
+    @responses.activate
+    def test_count(self, records):
+        result_count = "1"
+        resp_headers = {"Result-Count": result_count}
+        query = f'(MediaObjectId:"1")'
+        encoded_query = records.mh_client._encode_query_params(q=query)
+        url = f"{records.mh_client.base_url_path}{records._construct_path()}?{encoded_query}"
+        responses.add(
+            responses.HEAD,
+            url,
+            headers=resp_headers,
+            status=200,
+        )
+
+        resp = records.count(query)
+        assert resp == 1
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.url == url
+        assert responses.calls[0].response.headers["Result-Count"] == result_count
