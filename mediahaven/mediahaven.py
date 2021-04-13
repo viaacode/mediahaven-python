@@ -23,7 +23,9 @@ API_PATH = "mediahaven-rest-api/v2/"
 
 
 class MediaHavenException(Exception):
-    pass
+    def __init__(self, message: str, status_code: int = None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class AcceptFormat(Enum):
@@ -59,7 +61,7 @@ class MediaHavenClient:
                 error_message = response.json()
             except ValueError:
                 error_message = {"response": response.text}
-            raise MediaHavenException(error_message)
+            raise MediaHavenException(error_message, status_code=response.status_code)
 
     def _execute_request(self, **kwargs):
         """Execute an authorized request.

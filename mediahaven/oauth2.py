@@ -53,6 +53,7 @@ class OAuth2Grant(ABC):
             client_id: The ID of the client.
             client_secret: The secret of the client.
         """
+        self.client = None
         self.client_id = client_id
         self.client_secret = client_secret
         self.token = None
