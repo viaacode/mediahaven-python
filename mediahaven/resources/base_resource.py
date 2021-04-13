@@ -26,6 +26,9 @@ class BaseResource:
             Given the resource name "records" and the path_segments: (1,profiles,1).
             The constructed path is: "records/1/profiles/1".
 
+        If there are no path_segments, just the resource name  is returned. Without
+        a trailing slash.
+
         Args:
             *paths: Variable list of path segments.
 
@@ -33,4 +36,4 @@ class BaseResource:
             The constructed path of the request URL.
         """
         suffix = "/".join(map(str, path_segments))
-        return f"{self.name}/{suffix}"
+        return f"{self.name}/{suffix}" if suffix else self.name

@@ -49,3 +49,36 @@ class TestRecords:
             records.get(media_id)
         assert mhe.value.status_code == 404
         assert mhe.value.args[0] == resp_json
+
+    @responses.activate
+    def test_search(self, records):
+        media_id = "1"
+        resp_json = {
+            "NrOfResults": 1,
+            "Results": [
+                {
+                    "internal": {
+                        "RecordId": media_id,
+                    }
+                }
+            ],
+            "StartIndex": 0,
+            "TotalNrOfResults": 1,
+        }
+        query = f'(MediaObjectId:"{media_id}")'
+        encoded_query = records.mh_client._encode_query_params(q=query)
+        url = f"{records.mh_client.base_url_path}{records._construct_path()}?{encoded_query}"
+
+        responses.add(
+            responses.GET,
+            url,
+            json=resp_json,
+            status=200,
+        )
+
+        resp = records.search(query)
+
+        assert resp == resp_json
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.url == url
+        assert responses.calls[0].response.json() == resp_json
