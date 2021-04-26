@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from typing import List, Union
+from typing import Union
 
 from mediahaven.mediahaven import DEFAULT_ACCEPT_FORMAT
 from mediahaven.resources.base_resource import BaseResource
@@ -47,8 +47,8 @@ class Records(BaseResource):
 
     def search(
         self, query: str, accept_format=DEFAULT_ACCEPT_FORMAT, **query_params
-    ) -> Union[List[str], List[dict]]:
-        """Query multiple records.
+    ) -> Union[str, dict]:
+        """Query multiple records given a query string.
 
         Args:
             query: Free text search string.
@@ -58,12 +58,32 @@ class Records(BaseResource):
                     search results will be returned starting from this index.
                 query_params["nrOfResults"]: the number of results that will be returned
         Returns:
-            The records.
+            A paged result with the records.
         """
         return self.mh_client._get(
             self._construct_path(),
             accept_format,
             q=query,
+            **query_params,
+        )
+
+    def list(
+        self, accept_format=DEFAULT_ACCEPT_FORMAT, **query_params
+    ) -> Union[str, dict]:
+        """list the records.
+
+        Args:
+            accept_format: The "Accept" request header.
+            **query_params: The optional query paramaters:
+                query_params["startIndex"]: Used for pagination of search results,
+                    search results will be returned starting from this index.
+                query_params["nrOfResults"]: the number of results that will be returned
+        Returns:
+            A paged result with the records.
+        """
+        return self.mh_client._get(
+            self._construct_path(),
+            accept_format,
             **query_params,
         )
 
