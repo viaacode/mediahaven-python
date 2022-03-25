@@ -3,9 +3,11 @@
 
 import os
 from enum import Enum
-from typing import Union
+from typing import Optional
 
-import requests
+from requests import RequestException
+from requests.models import Response
+
 from oauthlib.oauth2.rfc6749.errors import (
     TokenExpiredError,
     InvalidGrantError,
@@ -99,7 +101,7 @@ class MediaHavenClient:
                 # Refresh token invalid / revoked
                 # Depending on grant, different action is needed
                 raise RefreshTokenError
-        except requests.RequestException:
+        except RequestException:
             # TODO: Log/raise?
             pass
         else:
@@ -112,7 +114,7 @@ class MediaHavenClient:
 
         return headers
 
-    def _encode_query_params(self, **query_params) -> dict:
+    def _encode_query_params(self, **query_params) -> Optional[str]:
         """Encode the query parameters.
 
         Encode the spaces in the query parameters as "%20" and not "+".
@@ -161,8 +163,8 @@ class MediaHavenClient:
 
     def _get(
         self, resource_path: str, accept_format: AcceptFormat, **query_params
-    ) -> Union[str, dict]:
-        """Execute a GET request and return the result information.
+    ) -> Response:
+        """Execute a GET request and return the HTTP response.
 
         Args:
             resource_path: The path of the resource.
@@ -170,7 +172,7 @@ class MediaHavenClient:
             **query_params: The query string parameters.
 
         Returns:
-            The information of the response.
+            The HTTP response.
 
         Raises:
             MediaHavenException: If the response has a status >= 400.
@@ -192,10 +194,8 @@ class MediaHavenClient:
         # Raise exception if the response state code >= 400
         self._raise_mediahaven_exception_if_needed(response)
 
-        # Parse response information
-        if accept_format == AcceptFormat.JSON:
-            return response.json()
-        return response.text
+        # Return response
+        return response
 
     def _delete(self, resource_path: str, **body) -> bool:
         """Execute a DELETE request.

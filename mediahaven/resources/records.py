@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from typing import Union
-
 from mediahaven.mediahaven import DEFAULT_ACCEPT_FORMAT
-from mediahaven.resources.base_resource import BaseResource
+from mediahaven.resources.base_resource import (
+    BaseResource,
+    MediaHavenPageObject,
+    MediaHavenPageObjectCreator,
+    MediaHavenSingleObject,
+    MediaHavenSingleObjectCreator,
+)
 
 
 class Records(BaseResource):
@@ -12,7 +16,7 @@ class Records(BaseResource):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.name = "records"
+        self._name = "records"
 
     def count(self, query: str) -> int:
         """Counts the amount the records given a query string.
@@ -23,14 +27,14 @@ class Records(BaseResource):
         Returns:
             The amount of records.
         """
-        return self.mh_client._head(
-            resource_path=self._construct_path(),
+        return self._mh_client._head(
+            self._construct_path(),
             q=query,
         )
 
     def get(
         self, record_id: str, accept_format=DEFAULT_ACCEPT_FORMAT
-    ) -> Union[str, dict]:
+    ) -> MediaHavenSingleObject:
         """Get a single record.
 
         Args:
@@ -38,53 +42,39 @@ class Records(BaseResource):
             accept_format: The "Accept" request header
 
         Returns:
-            The record.
+            A single record.
         """
-        return self.mh_client._get(
+        response = self._mh_client._get(
             self._construct_path(record_id),
             accept_format,
         )
+        return MediaHavenSingleObjectCreator.create_object(response)
 
     def search(
-        self, query: str, accept_format=DEFAULT_ACCEPT_FORMAT, **query_params
-    ) -> Union[str, dict]:
-        """Query multiple records given a query string.
+        self, accept_format=DEFAULT_ACCEPT_FORMAT, **query_params
+    ) -> MediaHavenPageObject:
+        """Search for multiple records.
 
         Args:
-            query: Free text search string.
             accept_format: The "Accept" request header.
             **query_params: The optional query paramaters:
+                query_params["q"]: Free text search string.
                 query_params["startIndex"]: Used for pagination of search results,
                     search results will be returned starting from this index.
                 query_params["nrOfResults"]: the number of results that will be returned
+                query_params["publicOnly"]: if true exclude from the output dynamic
+                    metadata fields which were marked as non public in the Profiles
+                    linked with the record.
         Returns:
             A paged result with the records.
         """
-        return self.mh_client._get(
+        response = self._mh_client._get(
             self._construct_path(),
             accept_format,
-            q=query,
             **query_params,
         )
-
-    def list(
-        self, accept_format=DEFAULT_ACCEPT_FORMAT, **query_params
-    ) -> Union[str, dict]:
-        """list the records.
-
-        Args:
-            accept_format: The "Accept" request header.
-            **query_params: The optional query paramaters:
-                query_params["startIndex"]: Used for pagination of search results,
-                    search results will be returned starting from this index.
-                query_params["nrOfResults"]: the number of results that will be returned
-        Returns:
-            A paged result with the records.
-        """
-        return self.mh_client._get(
-            self._construct_path(),
-            accept_format,
-            **query_params,
+        return MediaHavenPageObjectCreator.create_object(
+            response, accept_format, self, **query_params
         )
 
     def delete(self, record_id: str, reason: str = None, event_type: str = None):
@@ -104,7 +94,7 @@ class Records(BaseResource):
         if event_type:
             body["event_type"] = event_type
 
-        return self.mh_client._delete(
+        return self._mh_client._delete(
             resource_path=self._construct_path(record_id),
             **body,
         )

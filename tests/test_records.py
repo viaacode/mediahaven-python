@@ -1,3 +1,4 @@
+import json
 import pytest
 import responses
 
@@ -77,47 +78,9 @@ class TestRecords:
             status=200,
         )
 
-        resp = records.search(query)
+        resp = records.search(q=query)
 
-        assert resp == resp_json
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.url == url
-        assert responses.calls[0].response.json() == resp_json
-        assert responses.calls[0].response.status_code == 200
-
-    @responses.activate
-    def test_list(self, records):
-        media_ids = ["1", "2"]
-
-        records_json = [
-            {
-                "internal": {
-                    "RecordId": media_ids[0],
-                }
-            },
-            {
-                "internal": {
-                    "RecordId": media_ids[1],
-                }
-            },
-        ]
-        resp_json = {
-            "NrOfResults": 2,
-            "Results": records_json,
-            "StartIndex": 0,
-            "TotalNrOfResults": 2,
-        }
-        url = f"{records.mh_client.base_url_path}{records._construct_path()}"
-        responses.add(
-            responses.GET,
-            url,
-            json=resp_json,
-            status=200,
-        )
-
-        resp = records.list()
-
-        assert resp == resp_json
+        assert json.loads(resp._raw_response) == resp_json
         assert len(responses.calls) == 1
         assert responses.calls[0].request.url == url
         assert responses.calls[0].response.json() == resp_json
