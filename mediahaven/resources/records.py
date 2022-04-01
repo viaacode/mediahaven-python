@@ -90,9 +90,9 @@ class Records(BaseResource):
         # Construct the optional body
         body = {}
         if reason:
-            body["reason"] = reason
+            body["Reason"] = reason
         if event_type:
-            body["event_type"] = event_type
+            body["EventType"] = event_type
 
         return self._mh_client._delete(
             resource_path=self._construct_path(record_id),

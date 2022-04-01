@@ -215,7 +215,7 @@ class MediaHavenClient:
 
         # Execute the request
         response = self._execute_request(
-            **dict(method="DELETE", url=resource_url, files=body)
+            **dict(method="DELETE", url=resource_url, json=body)
         )
 
         # Raise appropriate exception if HTTPError occurred
