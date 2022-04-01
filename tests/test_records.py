@@ -29,7 +29,7 @@ class TestRecords:
 
         resp = records.get(media_id)
 
-        assert resp == resp_json
+        assert json.loads(resp.raw_response) == resp_json
         assert len(responses.calls) == 1
         assert responses.calls[0].request.url == url
         assert responses.calls[0].response.json() == resp_json
@@ -80,7 +80,7 @@ class TestRecords:
 
         resp = records.search(q=query)
 
-        assert json.loads(resp._raw_response) == resp_json
+        assert json.loads(resp.raw_response) == resp_json
         assert len(responses.calls) == 1
         assert responses.calls[0].request.url == url
         assert responses.calls[0].response.json() == resp_json

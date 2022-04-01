@@ -30,6 +30,10 @@ class BaseResource:
     def name(self):
         return self._name
 
+    @property
+    def mh_client(self):
+        return self._mh_client
+
     def _construct_path(self, *path_segments) -> str:
         """Construct the path of the request URL.
 
@@ -74,6 +78,10 @@ class MediaHavenSingleObject(ABC):
     def single_result(self):
         return self._single_result
 
+    @property
+    def raw_response(self):
+        return self._raw_response
+
 
 class MediaHavenSingleObjectJSON(MediaHavenSingleObject):
     def __init__(self, response: Response):
@@ -81,6 +89,9 @@ class MediaHavenSingleObjectJSON(MediaHavenSingleObject):
         self._single_result: SimpleNamespace = response.json(
             object_hook=lambda d: SimpleNamespace(**d)
         )
+
+    def __getattr__(self, attr):
+        return getattr(self.single_result, attr)
 
 
 class MediaHavenSingleObjectCreator:
@@ -100,7 +111,7 @@ class MediaHavenSingleObjectCreator:
             NotImplementedError: When passing an XML format.
         """
         if accept_format == AcceptFormat.JSON:
-            return MediaHavenSingleObject(response)
+            return MediaHavenSingleObjectJSON(response)
         else:
             raise NotImplementedError("XML format is not yet implemented")
 
@@ -168,6 +179,10 @@ class MediaHavenPageObject(ABC):
     @property
     def start_index(self):
         return self._start_index
+
+    @property
+    def raw_response(self):
+        return self._raw_response
 
 
 class MediaHavenPageObjectJSON(MediaHavenPageObject):

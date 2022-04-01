@@ -48,7 +48,7 @@ class Records(BaseResource):
             self._construct_path(record_id),
             accept_format,
         )
-        return MediaHavenSingleObjectCreator.create_object(response)
+        return MediaHavenSingleObjectCreator.create_object(response, accept_format)
 
     def search(
         self, accept_format=DEFAULT_ACCEPT_FORMAT, **query_params
