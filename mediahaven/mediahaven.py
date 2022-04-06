@@ -226,3 +226,60 @@ class MediaHavenClient:
             return True
 
         return False
+
+    def _post(
+        self, resource_path: str, json: dict = None, xml: str = None, **form_data
+    ) -> bool:
+        """Execute a POST request.
+
+        For some POST requests, MediaHaven allows JSON, XML or multipart/form-data.
+        Only one of the options is allowed. If multiple options are passed a
+        ValueError will be raised.
+
+        Args:
+            resource_path: The path of the resource.
+            json: The JSON payload.
+            xml: The XML payload.
+            **form_data: The payload as multipart/form-data.
+
+        Returns:
+            True if successful.
+
+        Raises:
+            MediaHavenException: If the response has a status >= 400.
+            ValueError: If multiple payload values are passed (json, xml or form_data).
+        """
+        # Check if only one payload value is passed
+        if bool(json) + bool(xml) + bool(form_data) != 1:
+            raise ValueError(
+                "Only one payload value is allowed (json, xml or form_data)"
+            )
+        # The resource URL up until path
+        resource_url = urljoin(self.base_url_path, resource_path)
+
+        # Depending on the type of payload a different request should be sends
+        if json:
+            # Execute the request
+            response = self._execute_request(
+                **dict(method="POST", url=resource_url, json=json)
+            )
+        elif xml:
+            headers = {"content-type": "application/xml"}
+            # Execute the request
+            response = self._execute_request(
+                **dict(method="POST", url=resource_url, headers=headers, data=xml)
+            )
+        else:
+            # Execute the request - Multipart/form-data
+            response = self._execute_request(
+                **dict(method="POST", url=resource_url, files=form_data)
+            )
+
+        # Raise appropriate exception if HTTPError occurred
+        self._raise_mediahaven_exception_if_needed(response)
+
+        # Parse response information
+        if response.status_code in (200, 204):
+            return True
+
+        return False

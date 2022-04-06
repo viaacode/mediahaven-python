@@ -123,3 +123,74 @@ class TestRecords:
         assert len(responses.calls) == 1
         assert responses.calls[0].request.url == url
         assert responses.calls[0].response.status_code == 204
+
+    @responses.activate
+    def test_update_json(self, records):
+        media_id = "1"
+        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
+
+        payload = {"description": "New description"}
+
+        responses.add(
+            responses.POST,
+            url,
+            status=204,
+        )
+
+        resp = records.update(media_id, json=payload)
+
+        assert resp is True
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.method == "POST"
+        assert responses.calls[0].request.headers["Content-Type"] == "application/json"
+        assert responses.calls[0].request.url == url
+        assert responses.calls[0].request.body.decode("utf8") == json.dumps(payload)
+        assert responses.calls[0].response.status_code == 204
+
+    @responses.activate
+    def test_update_xml(self, records):
+        media_id = "1"
+        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
+
+        payload = "<description>New description</description>"
+
+        responses.add(
+            responses.POST,
+            url,
+            status=204,
+        )
+
+        resp = records.update(media_id, xml=payload)
+
+        assert resp is True
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.method == "POST"
+        assert responses.calls[0].request.headers["Content-Type"] == "application/xml"
+        assert responses.calls[0].request.url == url
+        assert responses.calls[0].request.body == payload
+        assert responses.calls[0].response.status_code == 204
+
+    @responses.activate
+    def test_update_form_data(self, records):
+        media_id = "1"
+        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
+
+        payload = {"description": "New description"}
+
+        responses.add(
+            responses.POST,
+            url,
+            status=204,
+        )
+
+        resp = records.update(media_id, **payload)
+
+        assert resp is True
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.method == "POST"
+        assert (
+            "multipart/form-data" in responses.calls[0].request.headers["Content-Type"]
+        )
+        assert responses.calls[0].request.url == url
+        assert "New description" in str(responses.calls[0].request.body)
+        assert responses.calls[0].response.status_code == 204

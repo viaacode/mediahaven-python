@@ -27,7 +27,7 @@ class Records(BaseResource):
         Returns:
             The amount of records.
         """
-        return self._mh_client._head(
+        return self.mh_client._head(
             self._construct_path(),
             q=query,
         )
@@ -44,7 +44,7 @@ class Records(BaseResource):
         Returns:
             A single record.
         """
-        response = self._mh_client._get(
+        response = self.mh_client._get(
             self._construct_path(record_id),
             accept_format,
         )
@@ -68,7 +68,7 @@ class Records(BaseResource):
         Returns:
             A paged result with the records.
         """
-        response = self._mh_client._get(
+        response = self.mh_client._get(
             self._construct_path(),
             accept_format,
             **query_params,
@@ -94,7 +94,25 @@ class Records(BaseResource):
         if event_type:
             body["EventType"] = event_type
 
-        return self._mh_client._delete(
+        return self.mh_client._delete(
             resource_path=self._construct_path(record_id),
             **body,
+        )
+
+    def update(self, record_id: str, json: dict = None, xml: str = None, **form_data):
+        """Update a record.
+
+        Args:
+            record_id: The ID of the record to remove.
+                It can be either a MediaObjectId, FragmentId or RecordId.
+            json: The JSON payload.
+            xml: The XML payload.
+            **form_data: The payload as multipart/form-data.
+        """
+
+        return self.mh_client._post(
+            resource_path=self._construct_path(record_id),
+            json=json,
+            xml=xml,
+            **form_data,
         )
