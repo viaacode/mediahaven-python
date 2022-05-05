@@ -257,7 +257,7 @@ class MediaHavenClient:
         # The resource URL up until path
         resource_url = urljoin(self.base_url_path, resource_path)
 
-        # Depending on the type of payload a different request should be sends
+        # Depending on the type of payload a different request should be send
         if json:
             # Execute the request
             response = self._execute_request(
@@ -273,6 +273,54 @@ class MediaHavenClient:
             # Execute the request - Multipart/form-data
             response = self._execute_request(
                 **dict(method="POST", url=resource_url, files=form_data)
+            )
+
+        # Raise appropriate exception if HTTPError occurred
+        self._raise_mediahaven_exception_if_needed(response)
+
+        # Parse response information
+        if response.status_code in (200, 204):
+            return True
+
+        return False
+
+    def _put(
+        self, resource_path: str, json: dict = None, xml: str = None, **form_data
+    ) -> bool:
+        """Execute a PUT request.
+
+        For some PUT requests, MediaHaven allows JSON or XML. Only one of the options
+        is allowed. If multiple options are passed a ValueError will be raised.
+
+        Args:
+            resource_path: The path of the resource.
+            json: The JSON payload.
+            xml: The XML payload.
+
+        Returns:
+            True if successful.
+
+        Raises:
+            MediaHavenException: If the response has a status >= 400.
+            ValueError: If multiple payload values are passed (json or xml).
+        """
+        # Check if only one payload value is passed
+        if bool(json) + bool(xml) != 1:
+            raise ValueError("Only one payload value is allowed (json or xml)")
+        # The resource URL up until path
+        resource_url = urljoin(self.base_url_path, resource_path)
+
+        # Depending on the type of payload a different request should be send
+        if json:
+            # Execute the request
+            response = self._execute_request(
+                **dict(method="PUT", url=resource_url, json=json)
+            )
+        elif xml:
+            headers = {"content-type": "application/xml"}
+            # Execute the request
+            response = self._execute_request(
+                **dict(method="PUT", url=resource_url, headers=headers, data=xml)
             )
 
         # Raise appropriate exception if HTTPError occurred
