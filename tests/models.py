@@ -32,4 +32,6 @@ class OAuth2GrantTest(OAuth2Grant):
 
 class MediaHavenClientTest(MediaHavenClient):
     def __init__(self):
-        super().__init__(OAuth2GrantTest("id", "secret"))
+        super().__init__(
+            "https://localhost/", OAuth2GrantTest("https://localhost/", "id", "secret")
+        )

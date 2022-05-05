@@ -20,8 +20,7 @@ from mediahaven.oauth2 import (
     RefreshTokenError,
 )
 
-MH_BASE_URL = os.environ["MH_BASE_URL"]
-API_PATH = "mediahaven-rest-api/v2/"
+API_PATH = "/mediahaven-rest-api/v2/"
 
 
 class MediaHavenException(Exception):
@@ -44,9 +43,10 @@ DEFAULT_ACCEPT_FORMAT = AcceptFormat.JSON
 class MediaHavenClient:
     """The MediaHaven client class to communicate with MediaHaven."""
 
-    def __init__(self, grant: OAuth2Grant):
+    def __init__(self, mh_base_url: str, grant: OAuth2Grant):
         self.grant = grant
-        self.base_url_path = f"{MH_BASE_URL}{API_PATH}"
+        self.mh_base_url = mh_base_url
+        self.mh_api_url = urljoin(self.mh_base_url, API_PATH)
 
     def _raise_mediahaven_exception_if_needed(self, response):
         """Raise a MediaHaven exception if the response status >= 400.
@@ -142,7 +142,7 @@ class MediaHavenClient:
             MediaHavenException: If the response has a status >= 400.
         """
         # The resource URL up until path
-        resource_url = urljoin(self.base_url_path, resource_path)
+        resource_url = urljoin(self.mh_api_url, resource_path)
 
         # Get the query parameters in MH specific encoding
         params = self._encode_query_params(**query_params)
@@ -178,7 +178,7 @@ class MediaHavenClient:
             MediaHavenException: If the response has a status >= 400.
         """
         # The resource URL including the path
-        resource_url = urljoin(self.base_url_path, resource_path)
+        resource_url = urljoin(self.mh_api_url, resource_path)
 
         # Encode the query parameters in a MH specific encoding
         params = self._encode_query_params(**query_params)
@@ -211,7 +211,7 @@ class MediaHavenClient:
             MediaHavenException: If the response has a status >= 400.
         """
         # The resource URL up until path
-        resource_url = urljoin(self.base_url_path, resource_path)
+        resource_url = urljoin(self.mh_api_url, resource_path)
 
         # Execute the request
         response = self._execute_request(
@@ -255,7 +255,7 @@ class MediaHavenClient:
                 "Only one payload value is allowed (json, xml or form_data)"
             )
         # The resource URL up until path
-        resource_url = urljoin(self.base_url_path, resource_path)
+        resource_url = urljoin(self.mh_api_url, resource_path)
 
         # Depending on the type of payload a different request should be send
         if json:
@@ -308,7 +308,7 @@ class MediaHavenClient:
         if bool(json) + bool(xml) != 1:
             raise ValueError("Only one payload value is allowed (json or xml)")
         # The resource URL up until path
-        resource_url = urljoin(self.base_url_path, resource_path)
+        resource_url = urljoin(self.mh_api_url, resource_path)
 
         # Depending on the type of payload a different request should be send
         if json:

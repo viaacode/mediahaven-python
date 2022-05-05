@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
 from abc import ABC, abstractmethod
+from urllib.parse import urljoin
 
 from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2.rfc6749.errors import (
@@ -13,7 +13,6 @@ from oauthlib.oauth2.rfc6749.errors import (
 from requests_oauthlib import OAuth2Session
 
 logging.basicConfig(level=logging.INFO)
-MH_BASE_URL = os.environ["MH_BASE_URL"]
 
 
 class RequestTokenError(Exception):
@@ -46,18 +45,20 @@ class NoTokenError(Exception):
 class OAuth2Grant(ABC):
     """Abstract class representing an OAuth2 grant used in MediaHaven."""
 
-    def __init__(self, client_id: str, client_secret: str):
+    def __init__(self, mh_base_url: str, client_id: str, client_secret: str):
         """Initialize a Grant class.
 
         Args:
+            mh_base_url: The URL of MH auth server.
             client_id: The ID of the client.
             client_secret: The secret of the client.
         """
+        self.mh_base_url = mh_base_url
         self.client = None
         self.client_id = client_id
         self.client_secret = client_secret
         self.token = None
-        self.refresh_url = f"{MH_BASE_URL}auth/oauth2/token"
+        self.refresh_url = urljoin(self.mh_base_url, "/auth/oauth2/token")
 
     @abstractmethod
     def request_token(self):
@@ -95,9 +96,9 @@ class OAuth2Grant(ABC):
 class ROPCGrant(OAuth2Grant):
     """Represents a "Resource Owner Password Credential" grant."""
 
-    def __init__(self, client_id: str, client_secret: str):
-        super().__init__(client_id, client_secret)
-        self.token_url = f"{MH_BASE_URL}auth/ropc.php"
+    def __init__(self, mh_base_url: str, client_id: str, client_secret: str):
+        super().__init__(mh_base_url, client_id, client_secret)
+        self.token_url = urljoin(self.mh_base_url, "/auth/ropc.php")
         self.client = LegacyApplicationClient(self.client_id)
 
     def request_token(self, username: str, password: str):

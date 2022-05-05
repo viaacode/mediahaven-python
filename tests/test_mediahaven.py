@@ -18,7 +18,7 @@ class TestMediahaven:
             }
         }
         resource_path = f"get_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         responses.add(
             responses.GET,
@@ -48,7 +48,7 @@ class TestMediahaven:
         media_id = "1"
         resp_json = {"error": "not found"}
         resource_path = f"get_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
         responses.add(
             responses.GET,
             url,
@@ -75,7 +75,7 @@ class TestMediahaven:
         query = f'(MediaObjectId:"{media_id}")'
         encoded_query = mh_client._encode_query_params(q=query)
         resource_path = "head_resource"
-        url = f"{urljoin(mh_client.base_url_path, resource_path)}?{encoded_query}"
+        url = f"{urljoin(mh_client.mh_api_url, resource_path)}?{encoded_query}"
         responses.add(
             responses.HEAD,
             url,
@@ -97,7 +97,7 @@ class TestMediahaven:
         query = f'(MediaObjectId:"{media_id}")'
         encoded_query = mh_client._encode_query_params(q=query)
         resource_path = "head_resource/"
-        url = f"{urljoin(mh_client.base_url_path, resource_path)}?{encoded_query}"
+        url = f"{urljoin(mh_client.mh_api_url, resource_path)}?{encoded_query}"
         responses.add(
             responses.HEAD,
             url,
@@ -119,7 +119,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"delete_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
         responses.add(
             responses.DELETE,
             url,
@@ -145,7 +145,7 @@ class TestMediahaven:
         media_id = "1"
         resource_path = f"delete_resource/{media_id}"
         resp_json = {"error": "not found"}
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
         responses.add(
             responses.DELETE,
             url,
@@ -180,7 +180,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"post_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = {"description": "New description"}
 
@@ -214,7 +214,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"post_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = "<description>New description</description>"
 
@@ -248,7 +248,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"post_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = {"description": "New description"}
 
@@ -276,7 +276,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"post_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload_json = {"description": "New description"}
         payload_xml = "<description>New description</description>"
@@ -311,7 +311,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"put_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = {"description": "New description"}
 
@@ -345,7 +345,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"put_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = "<description>New description</description>"
 
@@ -371,7 +371,7 @@ class TestMediahaven:
         # Arrange
         media_id = "1"
         resource_path = f"put_resource/{media_id}"
-        url = urljoin(mh_client.base_url_path, resource_path)
+        url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload_json = {"description": "New description"}
         payload_xml = "<description>New description</description>"
