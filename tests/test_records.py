@@ -1,196 +1,114 @@
-import json
 import pytest
-import responses
+from unittest.mock import patch
 
-from mediahaven.mediahaven import MediaHavenException
+from mediahaven.resources.base_resource import AcceptFormat
 from mediahaven.resources.records import Records
 
 
 class TestRecords:
-    @pytest.fixture(scope="class")
-    def records(self, mh_client):
-        return Records(mh_client)
+    @pytest.fixture()
+    def records(self, mh_client_mock):
+        return Records(mh_client_mock)
 
-    @responses.activate
-    def test_get(self, records):
+    @patch("mediahaven.resources.records.MediaHavenSingleObjectCreator")
+    def test_get(self, object_creator_mock, records: Records):
+        # Arrange
         media_id = "1"
-        resp_json = {
-            "internal": {
-                "RecordId": media_id,
-            }
-        }
-        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
-        responses.add(
-            responses.GET,
-            url,
-            json=resp_json,
-            status=200,
+        mh_client_mock = records.mh_client
+
+        # Act
+        records.get(media_id)
+
+        # Assert
+        mh_client_mock._get.assert_called_once_with(
+            f"{records.name}/{media_id}", AcceptFormat.JSON
+        )
+        object_creator_mock.create_object.assert_called_once_with(
+            mh_client_mock._get(), AcceptFormat.JSON
         )
 
-        resp = records.get(media_id)
-
-        assert json.loads(resp.raw_response) == resp_json
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.url == url
-        assert responses.calls[0].response.json() == resp_json
-        assert responses.calls[0].response.status_code == 200
-
-    @responses.activate
-    def test_get_404(self, records):
+    @patch("mediahaven.resources.records.MediaHavenPageObjectCreator")
+    def test_search(self, object_creator_mock, records: Records):
+        # Arrange
         media_id = "1"
-        resp_json = {"error": "not found"}
-        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
-        responses.add(
-            responses.GET,
-            url,
-            json=resp_json,
-            status=404,
-        )
+        mh_client_mock = records.mh_client
 
-        with pytest.raises(MediaHavenException) as mhe:
-            records.get(media_id)
-        assert mhe.value.status_code == 404
-        assert mhe.value.args[0] == resp_json
-
-    @responses.activate
-    def test_search(self, records):
-        media_id = "1"
-        resp_json = {
-            "NrOfResults": 1,
-            "Results": [
-                {
-                    "internal": {
-                        "RecordId": media_id,
-                    }
-                }
-            ],
-            "StartIndex": 0,
-            "TotalNrOfResults": 1,
-        }
         query = f'(MediaObjectId:"{media_id}")'
-        encoded_query = records.mh_client._encode_query_params(q=query)
-        url = f"{records.mh_client.base_url_path}{records._construct_path()}?{encoded_query}"
 
-        responses.add(
-            responses.GET,
-            url,
-            json=resp_json,
-            status=200,
+        # Act
+        records.search(q=query)
+
+        # Assert
+        mh_client_mock._get.assert_called_once_with(
+            records.name, AcceptFormat.JSON, q='(MediaObjectId:"1")'
+        )
+        object_creator_mock.create_object.assert_called_once_with(
+            mh_client_mock._get(), AcceptFormat.JSON, records, q='(MediaObjectId:"1")'
         )
 
-        resp = records.search(q=query)
-
-        assert json.loads(resp.raw_response) == resp_json
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.url == url
-        assert responses.calls[0].response.json() == resp_json
-        assert responses.calls[0].response.status_code == 200
-
-    @responses.activate
-    def test_count(self, records):
-        result_count = "1"
-        resp_headers = {"Result-Count": result_count}
-        query = '(MediaObjectId:"1")'
-        encoded_query = records.mh_client._encode_query_params(q=query)
-        url = f"{records.mh_client.base_url_path}{records._construct_path()}?{encoded_query}"
-        responses.add(
-            responses.HEAD,
-            url,
-            headers=resp_headers,
-            status=200,
-        )
-
-        resp = records.count(query)
-        assert resp == 1
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.url == url
-        assert responses.calls[0].response.headers["Result-Count"] == result_count
-        assert responses.calls[0].response.status_code == 200
-
-    @responses.activate
-    def test_delete(self, records):
+    def test_count(self, records: Records):
+        # Arrange
         media_id = "1"
-        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
-        responses.add(
-            responses.DELETE,
-            url,
-            status=204,
+        query = f'(MediaObjectId:"{media_id}")'
+
+        # Act
+        records.count(query)
+
+        # Assert
+        records.mh_client._head.assert_called_once_with(records.name, q=query)
+
+    def test_delete(self, records: Records):
+        # Arrange
+        media_id = "1"
+        payload = {"reason": "reason", "event_type": "subtype"}
+
+        # Act
+        records.delete(media_id, **payload)
+
+        # Assert
+        records.mh_client._delete.assert_called_once_with(
+            f"{records.name}/{media_id}", Reason="reason", EventType="subtype"
         )
 
-        resp = records.delete(media_id)
-
-        assert resp is True
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.url == url
-        assert responses.calls[0].response.status_code == 204
-
-    @responses.activate
-    def test_update_json(self, records):
+    def test_update_json(self, records: Records):
+        # Arrange
         media_id = "1"
-        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
-
         payload = {"description": "New description"}
 
-        responses.add(
-            responses.POST,
-            url,
-            status=204,
-        )
-
+        # Act
         resp = records.update(media_id, json=payload)
 
-        assert resp is True
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.method == "POST"
-        assert responses.calls[0].request.headers["Content-Type"] == "application/json"
-        assert responses.calls[0].request.url == url
-        assert responses.calls[0].request.body.decode("utf8") == json.dumps(payload)
-        assert responses.calls[0].response.status_code == 204
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            f"{records.name}/{media_id}", json=payload, xml=None
+        )
 
-    @responses.activate
-    def test_update_xml(self, records):
+    def test_update_xml(self, records: Records):
+        # Arrange
         media_id = "1"
-        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
-
         payload = "<description>New description</description>"
 
-        responses.add(
-            responses.POST,
-            url,
-            status=204,
-        )
-
+        # Act
         resp = records.update(media_id, xml=payload)
 
-        assert resp is True
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.method == "POST"
-        assert responses.calls[0].request.headers["Content-Type"] == "application/xml"
-        assert responses.calls[0].request.url == url
-        assert responses.calls[0].request.body == payload
-        assert responses.calls[0].response.status_code == 204
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            f"{records.name}/{media_id}", json=None, xml=payload
+        )
 
-    @responses.activate
-    def test_update_form_data(self, records):
+    def test_update_form_data(self, records: Records):
+
+        # Arrange
         media_id = "1"
-        url = f"{records.mh_client.base_url_path}{records._construct_path(media_id)}"
-
         payload = {"description": "New description"}
 
-        responses.add(
-            responses.POST,
-            url,
-            status=204,
-        )
-
+        # Act
         resp = records.update(media_id, **payload)
 
-        assert resp is True
-        assert len(responses.calls) == 1
-        assert responses.calls[0].request.method == "POST"
-        assert (
-            "multipart/form-data" in responses.calls[0].request.headers["Content-Type"]
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            f"{records.name}/{media_id}", json=None, xml=None, **payload
         )
-        assert responses.calls[0].request.url == url
-        assert "New description" in str(responses.calls[0].request.body)
-        assert responses.calls[0].response.status_code == 204

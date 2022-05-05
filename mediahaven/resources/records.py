@@ -95,7 +95,7 @@ class Records(BaseResource):
             body["EventType"] = event_type
 
         return self.mh_client._delete(
-            resource_path=self._construct_path(record_id),
+            self._construct_path(record_id),
             **body,
         )
 
@@ -111,7 +111,7 @@ class Records(BaseResource):
         """
 
         return self.mh_client._post(
-            resource_path=self._construct_path(record_id),
+            self._construct_path(record_id),
             json=json,
             xml=xml,
             **form_data,
