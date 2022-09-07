@@ -55,7 +55,7 @@ class MediaHavenClient:
             The response.
 
         Raises:
-            A MediaHavenException wrapping the response error.
+            MediaHavenException wrapping the response error.
         """
 
         if response.status_code >= 400:
