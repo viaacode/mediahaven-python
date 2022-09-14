@@ -64,7 +64,7 @@ class OAuth2Grant(ABC):
     def request_token(self):
         pass
 
-    def _refresh_token(self):
+    def refresh_token(self):
         """Refresh the OAuth2 token with the saved refresh token.
 
         Issues a new access token but also a new refresh token.
