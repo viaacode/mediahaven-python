@@ -95,7 +95,7 @@ class MediaHavenClient:
             # There is a token but expired, try to refresh the token.
             try:
                 self.grant.refresh_token()
-                self.grant._get_session()
+                session = self.grant._get_session()
                 response = session.request(**kwargs)
             except InvalidGrantError:
                 # Refresh token invalid / revoked
