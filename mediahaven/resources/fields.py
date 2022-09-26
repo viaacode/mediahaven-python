@@ -20,7 +20,7 @@ class Fields(BaseResource):
         self._name = "field-definitions"
 
     def get(
-        self, field: str=None, accept_format=DEFAULT_ACCEPT_FORMAT, **query_params
+        self, field: str=None, accept_format=DEFAULT_ACCEPT_FORMAT,
     ) -> MediaHavenSingleObject:
         """Get all field definitions.
 
@@ -36,7 +36,9 @@ class Fields(BaseResource):
         )
         return MediaHavenSingleObjectCreator.create_object(response, accept_format)
 
-    def search(self, accept_format: str = DEFAULT_ACCEPT_FORMAT, **query_params) -> MediaHavenPageObject:
+    def search(
+        self, accept_format: str = DEFAULT_ACCEPT_FORMAT, **query_params
+    ) -> MediaHavenPageObject:
         """Search all field definitions.
 
         Args:
