@@ -25,13 +25,14 @@ class TestFields:
         object_creator_mock.create_object.assert_called_once_with(
             mh_client_mock._get(), AcceptFormat.JSON
         )
+        
     @patch("mediahaven.resources.fields.MediaHavenPageObjectCreator")
-    def test_get_all(self, object_creator_mock, fields: Fields):
+    def test_search(self, object_creator_mock, fields: Fields):
         # Arrange
         mh_client_mock = fields.mh_client
 
         # Act
-        fields.get()
+        fields.search()
 
         # Assert
         mh_client_mock._get.assert_called_once_with(
