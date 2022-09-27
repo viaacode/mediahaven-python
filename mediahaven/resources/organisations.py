@@ -21,7 +21,7 @@ class Organisations(BaseResource):
     def get(
         self, organisation: str, accept_format=DEFAULT_ACCEPT_FORMAT,
     ) -> MediaHavenSingleObject:
-        """Get all organisations.
+        """Get a single organisation.
         Args:
             organisation: The id of an organisation.
             accept_format: The "Accept" request header.
