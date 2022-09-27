@@ -5,9 +5,11 @@ from mediahaven.mediahaven import MediaHavenClient
 
 # Records
 from mediahaven.resources.records import Records
+from mediahaven.resources.fields import Fields
 
 
 class MediaHaven(MediaHavenClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.records = Records(self)
+        self.fields = Fields(self)
