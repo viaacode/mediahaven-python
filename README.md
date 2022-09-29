@@ -1,3 +1,9 @@
+<style>
+    table {
+        width: 100%;
+    }
+</style>
+
 # MediaHaven Python Library
 
 ## Synopsis
@@ -131,7 +137,7 @@ Parameters:
 | Name | Description | Default |
 | ---- | ----------- | ------- |
 | accept_format | The "Accept" request header. <br /> ```AcceptFormat``` <br /> JSON, XML, DUBLIN, METS or UNKOWN | JSON |
-| **query_params <br /> <ul><li>q</li><li>startIndex</li><li>nrOfResults</li><li>publicOnly</li></ul>| MediaObjectId, FragmentId or RecordId. <br /> <ul><li>Free text search string</li><li>Search results will be returned starting from this index.</li><li>Number of results that will be returned.</li><li>If true exclude fields which were marked as non public in the record's Profiles</li></ul> | *optional* |
+| **query_params <br /> <ul><li>q</li><li>startIndex</li><li>nrOfResults</li><li>publicOnly</li></ul>| The optional query paramaters. <br /> <ul><li>Free text search string</li><li>Search results will be returned starting from this index.</li><li>Number of results that will be returned.</li><li>If true exclude fields which were marked as non public in the record's Profiles</li></ul> | *optional* |
 
 Returns:
 | Type | Description | 
