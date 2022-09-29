@@ -1,9 +1,3 @@
-<style>
-    table {
-        width: 100%;
-    }
-</style>
-
 # MediaHaven Python Library
 
 ## Synopsis
@@ -34,24 +28,10 @@ Parameters:
 >>> # Get the credentials from env vars.
 >>> client_id = os.environ["CLIENT_ID"]
 >>> client_secret = os.environ["CLIENT_SECRET"]
->>> username = os.environ["USERNAME"]
->>> password = os.environ["PASSWORD"]
->>> url = os.environ["MH_URL"]
-
->>> # Get the credentials from env vars.
->>> client_id = os.environ["CLIENT_ID"]
->>> client_secret = os.environ["CLIENT_SECRET"]
->>> username = os.environ["USERNAME"]
->>> password = os.environ["PASSWORD"]
 >>> url = os.environ["MH_URL"]
 
 >>> # Create a ROPC grant
 >>> grant = ROPCGrant(url, client_id, client_secret)
->>> # Request a token
->>> try:
-...     grant.request_token(username, password)
-... except RequestTokenError as e:
-...     print(e)
 ```
 
 </details>
@@ -142,7 +122,10 @@ Parameters:
 Returns:
 | Type | Description | 
 | ---- | ----------- | 
-| ```MediaHavenPageObject``` | A paged result with the records. | 
+| [```MediaHavenPageObject```](#mediahavenpageobject) | A paged result with the records. | 
+
+<details>
+    <summary>Code example</summary>
 
 ```python
 >>> # Get page based on query
@@ -156,19 +139,44 @@ Returns:
 >>> print(records_page[0].Dynamic.PID)
 w3...0k
 ```
+
+</details>
+
+## ```mediahaven.resources.base_resource```
+### ```MediahavenSingleObject()```
+Represents a single result.
+### ```MediahavenPageObject()```
+Represents a paged result.
+### ```MediahavenPageObject.next_page()```
+Fetches the next page.
+
+Returns:
+| Type | Description | 
+| ---- | ----------- | 
+| [```MediahavenPageObject```](#mediahavenpageobject) | The next page. |
+
+<details>
+<summary>Code example</summary>
+
 ```python
 >>> # Get next page
->>> print(records_page.has_more)
-True
->>> print(next_page.nr_of_results)
-10
->>> print(next_page.total_nr_of_results)
-22
->>> print(next_page.start_index)
-10
->>> print(next_page[0].Dynamic.PID)
-2z...40
+>>> next_page = current_page.next_page()
+```
 
+</details>
+
+### ```MediahavenPageObject.as_generator()```
+Returns a generator for all the result items spread over all the pages.
+
+Returns:
+| Type | Description | 
+| ---- | ----------- | 
+| ```Generator``` | A generator for all result items. |
+
+<details>
+<summary>Code example</summary>
+
+```python
 >>> # Work via generator
 >>> for record in records_page.as_generator():
 ...     print(record.Dynamic.PID)
@@ -177,3 +185,89 @@ w3...0k
 <SNIP 20 IDs>
 9s...5t
 ```
+
+</details>
+
+### ```MediahavenPageObject.has_more()```
+Returns:
+| Type | Description | 
+| ---- | ----------- | 
+| ```bool``` | A boolean indicating if there are more pages. |
+
+Raises
+| Type | Description | 
+| ---- | ----------- | 
+| ```NoMorePagesException``` | When there are no pages left. |
+<details>
+<summary>Code example</summary>
+
+```python
+>>> print(records_page.has_more)
+True
+```
+
+</details>
+
+### ```MediahavenPageObject.nr_of_results()```
+Returns:
+| Type | Description | 
+| ---- | ----------- | 
+| ```int``` | Number of results on current page. |
+
+<details>
+<summary>Code example</summary>
+
+```python
+>>> print(current_page.nr_of_results)
+10
+```
+
+</details>
+
+### ```MediahavenPageObject.total_nr_of_results()```
+Returns:
+| Type | Description | 
+| ---- | ----------- | 
+| ```int``` | Total number of results of query. |
+
+<details>
+<summary>Code example</summary>
+
+```python
+>>> print(current_page.total_nr_of_results)
+10
+```
+
+</details>
+
+### ```MediahavenPageObject.start_index()```
+Returns:
+| Type | Description | 
+| ---- | ----------- | 
+| ```int``` | Current page's start index. |
+
+<details>
+<summary>Code example</summary>
+
+```python
+>>> print(current_page.start_index)
+10
+```
+
+</details>
+
+### ```MediahavenPageObject.raw_response()```
+Returns:
+| Type | Description | 
+| ---- | ----------- | 
+| ```str``` | Raw response text. |
+
+<details>
+<summary>Code example</summary>
+
+```python
+>>> print(current_page.raw_response)
+{...}
+```
+
+</details>
