@@ -13,7 +13,7 @@ from mediahaven.resources.base_resource import (
 
 
 class FieldDefinitions(BaseResource):
-    """Public API endpoint of MediaHaven metadata fields."""
+    """Public API endpoint of MediaHaven field definitions."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -22,7 +22,7 @@ class FieldDefinitions(BaseResource):
     def get(
         self, field: str=None, accept_format=DEFAULT_ACCEPT_FORMAT,
     ) -> MediaHavenSingleObject:
-        """Get all field definitions.
+        """Get a single field definition.
 
         Args:
             field: The id or FlatKey of a metadata field definition.
@@ -42,8 +42,14 @@ class FieldDefinitions(BaseResource):
         """Search all field definitions.
 
         Args:
-            query: The search query.
             accept_format: The "Accept" request header.
+            **query_params: The optional query paramaters:
+                query_params["startIndex"]: Used for pagination of search results,
+                    search results will be returned starting from this index.
+                query_params["nrOfResults"]: the number of results that will be returned
+                query_params["nested"]: If true include children and parents in the response, 
+                    defualt is false.
+                query_params["sort"]: Determine how to sort the field definitions. (FieldDefinitionId or LongTranslation)
         Returns:
             A paged result with the metadata field definitions.
         """
