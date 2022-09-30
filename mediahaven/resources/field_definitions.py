@@ -12,7 +12,7 @@ from mediahaven.resources.base_resource import (
 )
 
 
-class Fields(BaseResource):
+class FieldDefinitions(BaseResource):
     """Public API endpoint of MediaHaven metadata fields."""
 
     def __init__(self, *args, **kwargs):
