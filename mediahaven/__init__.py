@@ -8,6 +8,7 @@ from mediahaven.resources.records import Records
 from mediahaven.resources.field_definitions import FieldDefinitions
 from mediahaven.resources.organisations import Organisations
 
+
 class MediaHaven(MediaHavenClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
