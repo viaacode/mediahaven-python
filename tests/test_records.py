@@ -113,13 +113,10 @@ class TestRecords:
             f"{records.name}/{media_id}", json=None, xml=None, **payload
         )
 
-
     def test_publish_without_reason(self, records: Records):
         # Arrange
         media_id = "1"
-        body = {
-            "Publish": True
-        }
+        body = {"Publish": True}
 
         # Act
         resp = records.publish(media_id)
@@ -134,10 +131,7 @@ class TestRecords:
         # Arrange
         media_id = "1"
         reason = "test"
-        body = {
-            "Reason": reason,
-            "Publish": True
-        }
+        body = {"Reason": reason, "Publish": True}
 
         # Act
         resp = records.publish(media_id, reason)

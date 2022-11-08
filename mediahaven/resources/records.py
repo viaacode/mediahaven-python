@@ -130,7 +130,7 @@ class Records(BaseResource):
         body: Dict[str, Any] = {}
         if reason:
             body["Reason"] = reason
-        
+
         body["Publish"] = True
 
         return self.mh_client._post(self._construct_path(record_id), json=body)
