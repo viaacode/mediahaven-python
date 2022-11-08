@@ -10,9 +10,5 @@ setup(
     long_description=open("README.md", encoding="utf8").read(),
     zip_safe=False,
     setup_requires=["wheel"],
-    install_requires=[
-        "oauthlib==3.1.0",
-        "requests_oauthlib==1.3.0",
-        "requests"
-    ],
+    install_requires=["oauthlib==3.1.0", "requests_oauthlib==1.3.0", "requests"],
 )

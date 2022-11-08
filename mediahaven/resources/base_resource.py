@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from types import SimpleNamespace
 from typing import Generator, Optional, Union
@@ -116,6 +117,11 @@ class MediaHavenSingleObjectCreator:
             raise NotImplementedError("XML format is not yet implemented")
 
 
+class NoMorePagesException(Exception):
+    def __init__(self):
+        super().__init__()
+
+
 class MediaHavenPageObject(ABC):
     """Represents a paged result.
 
@@ -150,6 +156,18 @@ class MediaHavenPageObject(ABC):
         self._total_nr_of_results: Optional[int] = None
         self._has_more: Optional[bool] = None
         self._page_result: Optional[Union[SimpleNamespace, str]] = None
+
+    @abstractmethod
+    def next_page(self) -> MediaHavenPageObject:
+        """Fetches the next page.
+
+        Returns:
+            The next page.
+
+        Raises:
+            NoMorePagesException if there are no pages left.
+        """
+        pass
 
     @abstractmethod
     def as_generator(self) -> Generator[Union[SimpleNamespace, str], None, None]:
@@ -202,18 +220,23 @@ class MediaHavenPageObjectJSON(MediaHavenPageObject):
     def __getitem__(self, key):
         return self.page_result.Results[key]
 
+    def next_page(self) -> MediaHavenPageObjectJSON:
+        if self.has_more:
+            params = self._query_params.copy()
+            params["startIndex"] = self.start_index + self.nr_of_results
+            return self._resource.search(accept_format=AcceptFormat.JSON, **params)
+        else:
+            raise NoMorePagesException
+
     def as_generator(self) -> Generator[SimpleNamespace, None, None]:
         page = self
         while True:
             for result in page.page_result.Results:
                 yield result
 
-            if page.has_more:
-                # Fetch next page
-                params = page._query_params.copy()
-                params["StartIndex"] = page.start_index + page.nr_of_results
-                page = page._resource.search(accept_format=AcceptFormat.JSON, **params)
-            else:
+            try:
+                page = page.next_page()
+            except NoMorePagesException:
                 break
 
 
