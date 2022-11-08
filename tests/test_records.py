@@ -112,3 +112,32 @@ class TestRecords:
         records.mh_client._post.assert_called_once_with(
             f"{records.name}/{media_id}", json=None, xml=None, **payload
         )
+
+    def test_publish_without_reason(self, records: Records):
+        # Arrange
+        media_id = "1"
+        body = {"Publish": True}
+
+        # Act
+        resp = records.publish(media_id)
+
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            f"{records.name}/{media_id}", json=body
+        )
+
+    def test_publish_with_reason(self, records: Records):
+        # Arrange
+        media_id = "1"
+        reason = "test"
+        body = {"Reason": reason, "Publish": True}
+
+        # Act
+        resp = records.publish(media_id, reason)
+
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            f"{records.name}/{media_id}", json=body
+        )

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from typing import Any, Dict
 from mediahaven.mediahaven import DEFAULT_ACCEPT_FORMAT
 from mediahaven.resources.base_resource import (
     BaseResource,
@@ -116,3 +117,20 @@ class Records(BaseResource):
             xml=xml,
             **form_data,
         )
+
+    def publish(self, record_id: str, reason: str = None):
+        """Publishes a record.
+
+        Args:
+            record_id: The ID of the record to publish.
+                It can be either a MediaObjectId, FragmentId or RecordId.
+            reason: The reason to publish the record.
+        """
+        # Construct the body
+        body: Dict[str, Any] = {}
+        if reason:
+            body["Reason"] = reason
+
+        body["Publish"] = True
+
+        return self.mh_client._post(self._construct_path(record_id), json=body)
