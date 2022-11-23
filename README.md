@@ -51,6 +51,7 @@ w3...0k
 >>> # Get next page
 >>> print(records_page.has_more)
 True
+>>> next_page = records_page.next_page()
 >>> print(next_page.nr_of_results)
 10
 >>> print(next_page.total_nr_of_results)
