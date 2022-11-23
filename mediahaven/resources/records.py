@@ -40,7 +40,7 @@ class Records(BaseResource):
 
         Args:
             record_id: It can either be a MediaObjectId, FragmentId or RecordId.
-            accept_format: The "Accept" request header
+            accept_format: The "Accept" request header.
 
         Returns:
             A single record.
@@ -62,8 +62,8 @@ class Records(BaseResource):
                 query_params["q"]: Free text search string.
                 query_params["startIndex"]: Used for pagination of search results,
                     search results will be returned starting from this index.
-                query_params["nrOfResults"]: the number of results that will be returned
-                query_params["publicOnly"]: if true exclude from the output dynamic
+                query_params["nrOfResults"]: The number of results that will be returned.
+                query_params["publicOnly"]: If true exclude from the output dynamic
                     metadata fields which were marked as non public in the Profiles
                     linked with the record.
         Returns:

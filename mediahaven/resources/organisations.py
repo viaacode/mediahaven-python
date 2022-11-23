@@ -11,6 +11,7 @@ from mediahaven.resources.base_resource import (
     MediaHavenSingleObjectCreator,
 )
 
+
 class Organisations(BaseResource):
     """Public API endpoint of MediaHaven tenants."""
 
@@ -19,7 +20,9 @@ class Organisations(BaseResource):
         self._name = "organisations"
 
     def get(
-        self, organisation_id: str, accept_format=DEFAULT_ACCEPT_FORMAT,
+        self,
+        organisation_id: str,
+        accept_format=DEFAULT_ACCEPT_FORMAT,
     ) -> MediaHavenSingleObject:
         """Get a single organisation.
         Args:
@@ -33,7 +36,7 @@ class Organisations(BaseResource):
             accept_format,
         )
         return MediaHavenSingleObjectCreator.create_object(response, accept_format)
-    
+
     def search(
         self, accept_format: str = DEFAULT_ACCEPT_FORMAT, **query_params
     ) -> MediaHavenPageObject:
@@ -41,10 +44,10 @@ class Organisations(BaseResource):
         Args:
             query: The search query.
             accept_format: The "Accept" request header.
-            **query_params: The optional query paramaters:
+            **query_params: The optional query parameters:
                 query_params["startIndex"]: Used for pagination of search results,
                     search results will be returned starting from this index.
-                query_params["nrOfResults"]: the number of results that will be returned
+                query_params["nrOfResults"]: The number of results that will be returned.
         Returns:
             A paged result with the organisations.
         """
