@@ -3,4 +3,4 @@ black==22.1.0
 Mypy==0.940
 # Testing
 pytest==7.2.0
-responses==0.13.2
+responses==0.22.0
