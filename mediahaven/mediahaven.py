@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
 from enum import Enum
 from typing import Optional
 
@@ -101,6 +100,8 @@ class MediaHavenClient:
                 # Refresh token invalid / revoked
                 # Depending on grant, different action is needed
                 raise RefreshTokenError
+            else:
+                return response
         except RequestException:
             # TODO: Log/raise?
             pass

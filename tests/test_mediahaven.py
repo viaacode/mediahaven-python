@@ -2,6 +2,9 @@ import json
 
 import pytest
 import responses
+from oauthlib.oauth2.rfc6749.errors import (
+    TokenExpiredError,
+)
 from urllib.parse import urljoin
 
 from mediahaven.mediahaven import AcceptFormat, MediaHavenClient, MediaHavenException
@@ -20,8 +23,7 @@ class TestMediahaven:
         resource_path = f"get_resource/{media_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
-        responses.add(
-            responses.GET,
+        responses.get(
             url,
             json=resp_json,
             status=200,
@@ -49,8 +51,7 @@ class TestMediahaven:
         resp_json = {"error": "not found"}
         resource_path = f"get_resource/{media_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
-        responses.add(
-            responses.GET,
+        responses.get(
             url,
             json=resp_json,
             status=404,
@@ -76,8 +77,7 @@ class TestMediahaven:
         encoded_query = mh_client._encode_query_params(q=query)
         resource_path = "head_resource"
         url = f"{urljoin(mh_client.mh_api_url, resource_path)}?{encoded_query}"
-        responses.add(
-            responses.HEAD,
+        responses.head(
             url,
             headers=resp_headers,
             status=200,
@@ -98,8 +98,7 @@ class TestMediahaven:
         encoded_query = mh_client._encode_query_params(q=query)
         resource_path = "head_resource/"
         url = f"{urljoin(mh_client.mh_api_url, resource_path)}?{encoded_query}"
-        responses.add(
-            responses.HEAD,
+        responses.head(
             url,
             status=400,
         )
@@ -120,8 +119,7 @@ class TestMediahaven:
         media_id = "1"
         resource_path = f"delete_resource/{media_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
-        responses.add(
-            responses.DELETE,
+        responses.delete(
             url,
             status=status,
         )
@@ -146,8 +144,7 @@ class TestMediahaven:
         resource_path = f"delete_resource/{media_id}"
         resp_json = {"error": "not found"}
         url = urljoin(mh_client.mh_api_url, resource_path)
-        responses.add(
-            responses.DELETE,
+        responses.delete(
             url,
             json=resp_json,
             status=404,
@@ -184,8 +181,7 @@ class TestMediahaven:
 
         payload = {"description": "New description"}
 
-        responses.add(
-            responses.POST,
+        responses.post(
             url,
             status=status,
         )
@@ -218,8 +214,7 @@ class TestMediahaven:
 
         payload = "<description>New description</description>"
 
-        responses.add(
-            responses.POST,
+        responses.post(
             url,
             status=status,
         )
@@ -252,8 +247,7 @@ class TestMediahaven:
 
         payload = {"description": "New description"}
 
-        responses.add(
-            responses.POST,
+        responses.post(
             url,
             status=status,
         )
@@ -272,6 +266,7 @@ class TestMediahaven:
         assert "New description" in str(responses.calls[0].request.body)
         assert responses.calls[0].response.status_code == status
 
+    @responses.activate
     def test_post_value_error(self, mh_client):
         # Arrange
         media_id = "1"
@@ -281,8 +276,7 @@ class TestMediahaven:
         payload_json = {"description": "New description"}
         payload_xml = "<description>New description</description>"
         payload_form = {"description": "New description"}
-        responses.add(
-            responses.POST,
+        responses.post(
             url,
             status=204,
         )
@@ -315,8 +309,7 @@ class TestMediahaven:
 
         payload = {"description": "New description"}
 
-        responses.add(
-            responses.PUT,
+        responses.put(
             url,
             status=status,
         )
@@ -349,8 +342,7 @@ class TestMediahaven:
 
         payload = "<description>New description</description>"
 
-        responses.add(
-            responses.PUT,
+        responses.put(
             url,
             status=status,
         )
@@ -367,6 +359,7 @@ class TestMediahaven:
         assert responses.calls[0].request.body == payload
         assert responses.calls[0].response.status_code == status
 
+    @responses.activate
     def test_put_value_error(self, mh_client):
         # Arrange
         media_id = "1"
@@ -376,8 +369,7 @@ class TestMediahaven:
         payload_json = {"description": "New description"}
         payload_xml = "<description>New description</description>"
 
-        responses.add(
-            responses.PUT,
+        responses.put(
             url,
             status=204,
         )
@@ -388,3 +380,33 @@ class TestMediahaven:
 
         # Assert
         assert ve.value.args[0] == "Only one payload value is allowed (json or xml)"
+
+    @responses.activate
+    def test_execute_request_token_expired(self, mh_client):
+        # Arrange
+        media_id = "1"
+        resource_path = f"put_resource/{media_id}"
+        url = urljoin(mh_client.mh_api_url, resource_path)
+        # First call 
+        error = TokenExpiredError("Token expired")
+        responses.get(url, body=error)
+        # SEcond call
+        resp_json = {
+            "internal": {
+                "RecordId": media_id,
+            }
+        }
+        responses.get(
+            url,
+            json=resp_json,
+            status=200,
+        )
+
+        # Act
+        resp = mh_client._get(resource_path, AcceptFormat.JSON)
+
+        # Assert
+        assert len(responses.calls) == 2
+        assert responses.calls[0].response == error
+        assert responses.calls[1].response.json() == resp_json
+        assert resp.json() == resp_json
