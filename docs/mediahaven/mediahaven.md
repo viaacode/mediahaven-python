@@ -13,7 +13,7 @@ Mediahaven
 
 ## AcceptFormat
 
-[Show source in mediahaven.py:32](../../mediahaven/mediahaven.py#L32)
+[Show source in mediahaven.py:31](../../mediahaven/mediahaven.py#L31)
 
 #### Signature
 
@@ -26,7 +26,7 @@ class AcceptFormat(Enum):
 
 ## MediaHavenClient
 
-[Show source in mediahaven.py:43](../../mediahaven/mediahaven.py#L43)
+[Show source in mediahaven.py:42](../../mediahaven/mediahaven.py#L42)
 
 The MediaHaven client class to communicate with MediaHaven.
 
@@ -46,7 +46,7 @@ class MediaHavenClient:
 
 ## MediaHavenException
 
-[Show source in mediahaven.py:26](../../mediahaven/mediahaven.py#L26)
+[Show source in mediahaven.py:25](../../mediahaven/mediahaven.py#L25)
 
 #### Signature
 

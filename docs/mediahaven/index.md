@@ -11,7 +11,7 @@ MediaHaven
 
 ## MediaHaven
 
-[Show source in __init__.py:10](../../mediahaven/__init__.py#L10)
+[Show source in __init__.py:12](../../mediahaven/__init__.py#L12)
 
 #### Signature
 

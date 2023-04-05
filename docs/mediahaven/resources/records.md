@@ -12,12 +12,13 @@ Records
     - [Records().count](#records()count)
     - [Records().delete](#records()delete)
     - [Records().get](#records()get)
+    - [Records().publish](#records()publish)
     - [Records().search](#records()search)
     - [Records().update](#records()update)
 
 ## Records
 
-[Show source in records.py:14](../../../mediahaven/resources/records.py#L14)
+[Show source in records.py:15](../../../mediahaven/resources/records.py#L15)
 
 Public API endpoint of a MediaHaven record.
 
@@ -35,7 +36,7 @@ class Records(BaseResource):
 
 ### Records().count
 
-[Show source in records.py:21](../../../mediahaven/resources/records.py#L21)
+[Show source in records.py:22](../../../mediahaven/resources/records.py#L22)
 
 Counts the amount the records given a query string.
 
@@ -56,7 +57,7 @@ def count(self, query: str) -> int:
 
 ### Records().delete
 
-[Show source in records.py:80](../../../mediahaven/resources/records.py#L80)
+[Show source in records.py:81](../../../mediahaven/resources/records.py#L81)
 
 Delete a record.
 
@@ -76,14 +77,14 @@ def delete(self, record_id: str, reason: str = None, event_type: str = None):
 
 ### Records().get
 
-[Show source in records.py:35](../../../mediahaven/resources/records.py#L35)
+[Show source in records.py:36](../../../mediahaven/resources/records.py#L36)
 
 Get a single record.
 
 #### Arguments
 
 - `record_id` - It can either be a MediaObjectId, FragmentId or RecordId.
-- `accept_format` - The "Accept" request header
+- `accept_format` - The "Accept" request header.
 
 #### Returns
 
@@ -103,9 +104,28 @@ def get(
 - [DEFAULT_ACCEPT_FORMAT](../mediahaven.md#default_accept_format)
 - [MediaHavenSingleObject](./base_resource.md#mediahavensingleobject)
 
+### Records().publish
+
+[Show source in records.py:121](../../../mediahaven/resources/records.py#L121)
+
+Publishes a record.
+
+#### Arguments
+
+- `record_id` - The ID of the record to publish.
+    It can be either a MediaObjectId, FragmentId or RecordId.
+- `reason` - The reason to publish the record.
+
+#### Signature
+
+```python
+def publish(self, record_id: str, reason: str = None):
+    ...
+```
+
 ### Records().search
 
-[Show source in records.py:53](../../../mediahaven/resources/records.py#L53)
+[Show source in records.py:54](../../../mediahaven/resources/records.py#L54)
 
 Search for multiple records.
 
@@ -116,8 +136,8 @@ Search for multiple records.
     - `query_params["q"]` - Free text search string.
     - `query_params["startIndex"]` - Used for pagination of search results,
         search results will be returned starting from this index.
-    - `query_params["nrOfResults"]` - the number of results that will be returned
-    - `query_params["publicOnly"]` - if true exclude from the output dynamic
+    - `query_params["nrOfResults"]` - The number of results that will be returned.
+    - `query_params["publicOnly"]` - If true exclude from the output dynamic
         metadata fields which were marked as non public in the Profiles
         linked with the record.
 
@@ -141,7 +161,7 @@ def search(
 
 ### Records().update
 
-[Show source in records.py:102](../../../mediahaven/resources/records.py#L102)
+[Show source in records.py:103](../../../mediahaven/resources/records.py#L103)
 
 Update a record.
 

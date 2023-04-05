@@ -12,4 +12,6 @@ Resources
 ## Modules
 
 - [BaseResource](./base_resource.md)
+- [FieldDefinitions](./field_definitions.md)
+- [Organisations](./organisations.md)
 - [Records](./records.md)
