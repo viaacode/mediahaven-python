@@ -1,6 +1,6 @@
 # Oauth2
 
-[Mediahaven-python Index](../README.md#mediahaven-python-index) /
+[Mediahaven-python Index](../../README.md#mediahaven-python-index) /
 [MediaHaven](./index.md#mediahaven) /
 Oauth2
 
