@@ -1,10 +1,12 @@
 import json
+from unittest.mock import patch
 
 import pytest
 import responses
 from oauthlib.oauth2.rfc6749.errors import (
     TokenExpiredError,
 )
+from requests import RequestException
 from urllib.parse import urljoin
 
 from mediahaven.mediahaven import AcceptFormat, MediaHavenClient, MediaHavenException
@@ -381,32 +383,17 @@ class TestMediahaven:
         # Assert
         assert ve.value.args[0] == "Only one payload value is allowed (json or xml)"
 
-    @responses.activate
-    def test_execute_request_token_expired(self, mh_client):
-        # Arrange
-        media_id = "1"
-        resource_path = f"put_resource/{media_id}"
-        url = urljoin(mh_client.mh_api_url, resource_path)
-        # First call 
-        error = TokenExpiredError("Token expired")
-        responses.get(url, body=error)
-        # SEcond call
-        resp_json = {
-            "internal": {
-                "RecordId": media_id,
-            }
-        }
-        responses.get(
-            url,
-            json=resp_json,
-            status=200,
-        )
-
+    @patch("requests.sessions.Session.request", side_effect=(TokenExpiredError("Token expired"), {"internal": {"test"}}))
+    def test_execute_request_token_expired(self, session_mock, mh_client):
         # Act
-        resp = mh_client._get(resource_path, AcceptFormat.JSON)
+        resp = mh_client._execute_request()
 
         # Assert
-        assert len(responses.calls) == 2
-        assert responses.calls[0].response == error
-        assert responses.calls[1].response.json() == resp_json
-        assert resp.json() == resp_json
+        assert session_mock.call_count == 2
+        assert resp == {"internal": {"test"}}
+
+    @patch("requests.sessions.Session.request", side_effect=RequestException)
+    def test_execute_request_exception(self, session_mock, mh_client):
+        # Act and Assert
+        with pytest.raises(RequestException):
+            mh_client._execute_request()

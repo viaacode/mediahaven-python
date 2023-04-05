@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging
 from abc import ABC, abstractmethod
 from urllib.parse import urljoin
 
@@ -11,8 +10,6 @@ from oauthlib.oauth2.rfc6749.errors import (
     InvalidClientError,
 )
 from requests_oauthlib import OAuth2Session
-
-logging.basicConfig(level=logging.INFO)
 
 
 class RequestTokenError(Exception):

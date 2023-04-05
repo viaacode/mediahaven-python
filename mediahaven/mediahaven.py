@@ -6,7 +6,6 @@ from typing import Optional
 
 from requests import RequestException
 from requests.models import Response
-
 from oauthlib.oauth2.rfc6749.errors import (
     TokenExpiredError,
     InvalidGrantError,
@@ -80,6 +79,7 @@ class MediaHavenClient:
         Raises:
             NoTokenError: If a token has not yet been requested.
             RefreshTokenError: If an error occurred when refreshing the token.
+            requests.RequestException: Reraise if a RequestException happen.
         """
         # Get a session with a valid auth
         try:
@@ -103,8 +103,7 @@ class MediaHavenClient:
             else:
                 return response
         except RequestException:
-            # TODO: Log/raise?
-            pass
+            raise
         else:
             return response
 
