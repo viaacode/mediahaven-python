@@ -1,6 +1,6 @@
 # MediaHaven
 
-[Mediahaven-python Index](../../README.md#mediahaven-python-index) /
+[Mediahaven-python Index](../README.md#mediahaven-python-index) /
 MediaHaven
 
 > Auto-generated documentation for [mediahaven](../../mediahaven/__init__.py) module.

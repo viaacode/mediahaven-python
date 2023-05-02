@@ -1,6 +1,6 @@
 # Records
 
-[Mediahaven-python Index](../../../README.md#mediahaven-python-index) /
+[Mediahaven-python Index](../../README.md#mediahaven-python-index) /
 [MediaHaven](../index.md#mediahaven) /
 [Resources](./index.md#resources) /
 Records
