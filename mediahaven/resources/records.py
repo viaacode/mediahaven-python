@@ -134,3 +134,23 @@ class Records(BaseResource):
         body["Publish"] = True
 
         return self.mh_client._post(self._construct_path(record_id), json=body)
+
+    def create_fragment(self, json: dict = None, xml: str = None, **form_data):
+        """Update a record.
+
+        Args:
+            record_id: The ID of the record to remove.
+                It can be either a MediaObjectId, FragmentId or RecordId.
+            json: The JSON payload.
+            xml: The XML payload.
+            **form_data: The payload as multipart/form-data.
+        """
+
+        return self.mh_client._post(
+            self._construct_path(),
+            json=json,
+            xml=xml,
+            **form_data,
+        )
+
+
