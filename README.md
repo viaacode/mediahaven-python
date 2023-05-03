@@ -6,7 +6,7 @@ The Mediahaven Python library provides a way to communicate with MediaHaven via 
 
 ## Documentation
 
-See the automatically generated [documentation](/docs/README.md).
+For more information about the internals of this library: see the automatically generated [documentation](/docs/README.md).
 
 ## Usage
 
