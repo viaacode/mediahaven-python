@@ -135,7 +135,7 @@ class Records(BaseResource):
 
         return self.mh_client._post(self._construct_path(record_id), json=body)
 
-    def create_fragment(self, json: dict = None, xml: str = None, **form_data):
+    def create_fragment(self, title: str, parent_record_id: str, start_time_code = None, end_time_code = None, start_frames = None, end_frames = None):
         """Update a record.
 
         Args:
@@ -145,12 +145,31 @@ class Records(BaseResource):
             xml: The XML payload.
             **form_data: The payload as multipart/form-data.
         """
+        # Build the json
+        json = {
+            "Title": title,
+            "Type": "fragment",
+            "Publish": True,
+            "Fragment":{
+                "ParentRecordId": parent_record_id
+            }
+        }
+        
+        # Add the timecode or frames
+        if (start_time_code or end_time_code) and (start_frames or end_frames):
+            raise TypeError("Provide either a combination of start_time_code and end_time_code or of start_frames and end_frames.")
+        elif start_time_code and end_time_code:
+            json["Fragment"]["FragmentStartTimeCode"] = start_time_code
+            json["Fragment"]["FragmentEndTimeCode"] = end_time_code
+        elif start_frames and end_frames:
+            json["Fragment"]["FragmentStartFrames"] = start_frames
+            json["Fragment"]["FragmentEndFrames"] = end_frames
+        else:
+            raise TypeError("Provide either a combination of start_time_code and end_time_code or of start_frames and end_frames.")
 
         return self.mh_client._post(
             self._construct_path(),
             json=json,
-            xml=xml,
-            **form_data,
         )
 
 
