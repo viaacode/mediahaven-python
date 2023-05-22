@@ -135,29 +135,39 @@ class Records(BaseResource):
 
         return self.mh_client._post(self._construct_path(record_id), json=body)
 
-    def create_fragment(self, title: str, parent_record_id: str, start_time_code = None, end_time_code = None, start_frames = None, end_frames = None):
-        """Update a record.
+    def create_fragment(
+        self,
+        record_id: str,
+        title: str,
+        start_time_code=None,
+        end_time_code=None,
+        start_frames=None,
+        end_frames=None,
+    ):
+        """Create a fragment for an existing record.
 
         Args:
-            record_id: The ID of the record to remove.
-                It can be either a MediaObjectId, FragmentId or RecordId.
-            json: The JSON payload.
-            xml: The XML payload.
-            **form_data: The payload as multipart/form-data.
+            record_id: The ID of the record to create a fragment for.
+                It needs to be the RecordId.
+            title: The title of the fragment object.
+            start_time_code: The start time code of the fragment.
+            end_time_code: The end time code of the fragment.
+            start_frames: The start time of the fragment in frames.
+            end_frames: The end time of the fragment in frames.
         """
-        # Build the json
+        # Build the JSON
         json = {
             "Title": title,
             "Type": "fragment",
             "Publish": True,
-            "Fragment":{
-                "ParentRecordId": parent_record_id
-            }
+            "Fragment": {"ParentRecordId": record_id},
         }
-        
-        # Add the timecode or frames
+
+        # Add the timecodes or frames
         if (start_time_code or end_time_code) and (start_frames or end_frames):
-            raise TypeError("Provide either a combination of start_time_code and end_time_code or of start_frames and end_frames.")
+            raise TypeError(
+                "Provide either a combination of start_time_code and end_time_code or start_frames and end_frames."
+            )
         elif start_time_code and end_time_code:
             json["Fragment"]["FragmentStartTimeCode"] = start_time_code
             json["Fragment"]["FragmentEndTimeCode"] = end_time_code
@@ -165,11 +175,11 @@ class Records(BaseResource):
             json["Fragment"]["FragmentStartFrames"] = start_frames
             json["Fragment"]["FragmentEndFrames"] = end_frames
         else:
-            raise TypeError("Provide either a combination of start_time_code and end_time_code or of start_frames and end_frames.")
+            raise TypeError(
+                "Provide either a combination of start_time_code and end_time_code or start_frames and end_frames."
+            )
 
         return self.mh_client._post(
             self._construct_path(),
             json=json,
         )
-
-
