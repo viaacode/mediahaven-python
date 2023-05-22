@@ -243,7 +243,10 @@ class MediaHavenClient:
             **form_data: The payload as multipart/form-data.
 
         Returns:
-            True if successful.
+            The requests response as a dict if the status code is in the successful
+            2xx range.
+            None if the response is not in the successful range but also not in the
+            error ranges (4xx-5xx).
 
         Raises:
             MediaHavenException: If the response has a status >= 400.
@@ -279,7 +282,7 @@ class MediaHavenClient:
         self._raise_mediahaven_exception_if_needed(response)
 
         # Parse response information
-        if response.status_code in (200, 204):
+        if response.status_code in (range(200, 207)):
             return response.json()
 
         return None
