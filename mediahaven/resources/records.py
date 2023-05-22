@@ -154,6 +154,12 @@ class Records(BaseResource):
             end_time_code: The end time code of the fragment.
             start_frames: The start time of the fragment in frames.
             end_frames: The end time of the fragment in frames.
+
+        Raises:
+            ValueError: Start and end time need to be provided. They can be provided
+                as timecodes or as frames. However, only one set can be provided, and
+                one set needs to contain both start and end values. In any other case,
+                raise a ValueError.
         """
         # Build the JSON
         json = {
@@ -165,7 +171,7 @@ class Records(BaseResource):
 
         # Add the timecodes or frames
         if (start_time_code or end_time_code) and (start_frames or end_frames):
-            raise TypeError(
+            raise ValueError(
                 "Provide either a combination of start_time_code and end_time_code or start_frames and end_frames."
             )
         elif start_time_code and end_time_code:
@@ -175,7 +181,7 @@ class Records(BaseResource):
             json["Fragment"]["FragmentStartFrames"] = start_frames
             json["Fragment"]["FragmentEndFrames"] = end_frames
         else:
-            raise TypeError(
+            raise ValueError(
                 "Provide either a combination of start_time_code and end_time_code or start_frames and end_frames."
             )
 
