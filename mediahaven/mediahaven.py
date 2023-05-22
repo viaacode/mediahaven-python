@@ -229,7 +229,7 @@ class MediaHavenClient:
 
     def _post(
         self, resource_path: str, json: dict = None, xml: str = None, **form_data
-    ):
+    ) -> Optional[dict]:
         """Execute a POST request.
 
         For some POST requests, MediaHaven allows JSON, XML or multipart/form-data.
