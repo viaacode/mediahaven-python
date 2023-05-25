@@ -139,10 +139,10 @@ class Records(BaseResource):
         self,
         record_id: str,
         title: str,
-        start_time_code=None,
-        end_time_code=None,
-        start_frames=None,
-        end_frames=None,
+        start_time_code: str = None,
+        end_time_code: str = None,
+        start_frames: int = None,
+        end_frames: int = None,
     ):
         """Create a fragment for an existing record.
 

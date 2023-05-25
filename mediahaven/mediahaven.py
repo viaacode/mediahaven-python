@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Optional
 
 from requests import RequestException
+from requests.exceptions import JSONDecodeError
 from requests.models import Response
 from oauthlib.oauth2.rfc6749.errors import (
     TokenExpiredError,
@@ -243,10 +244,11 @@ class MediaHavenClient:
             **form_data: The payload as multipart/form-data.
 
         Returns:
-            The requests response as a dict if the status code is in the successful
-            2xx range.
-            None if the response is not in the successful range but also not in the
-            error ranges (4xx-5xx).
+            - The requests response as a dict if the status code is in the successful
+                2xx range and the response contains a body.
+            - None if the status code is:
+              - In the successful 2xx range but no response body.
+              - Not in the successful 2xx range but also not in error range (4xx-5xx).
 
         Raises:
             MediaHavenException: If the response has a status >= 400.
@@ -283,7 +285,10 @@ class MediaHavenClient:
 
         # Parse response information
         if response.status_code in (range(200, 207)):
-            return response.json()
+            try:
+                return response.json()
+            except JSONDecodeError:
+                return None
 
         return None
 
