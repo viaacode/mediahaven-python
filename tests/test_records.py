@@ -197,7 +197,7 @@ class TestRecords:
                     "FragmentEndFrames": 10,
                 },
             },
-        )6
+        )
 
     def test_create_fragment_value_error_no_values(self, records: Records):
         # Arrange
