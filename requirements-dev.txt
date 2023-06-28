@@ -1,5 +1,5 @@
 flake8==3.9.0
-black==22.1.0
+black==22.3.0
 Mypy==0.940
 # Testing
 pytest==7.2.0

@@ -16,13 +16,13 @@ class TestMediahaven:
     @responses.activate
     def test_get(self, mh_client: MediaHavenClient):
         # Arrange
-        media_id = "1"
+        record_id = "1"
         resp_json = {
             "internal": {
-                "RecordId": media_id,
+                "RecordId": record_id,
             }
         }
-        resource_path = f"get_resource/{media_id}"
+        resource_path = f"get_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         responses.get(
@@ -49,9 +49,9 @@ class TestMediahaven:
     @responses.activate
     def test_get_404(self, mh_client):
         # Arrange
-        media_id = "1"
+        record_id = "1"
         resp_json = {"error": "not found"}
-        resource_path = f"get_resource/{media_id}"
+        resource_path = f"get_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
         responses.get(
             url,
@@ -72,10 +72,10 @@ class TestMediahaven:
     @responses.activate
     def test_head(self, mh_client):
         # Arrange
-        media_id = "1"
+        record_id = "1"
         result_count = "1"
         resp_headers = {"Result-Count": result_count}
-        query = f'(MediaObjectId:"{media_id}")'
+        query = f'(MediaObjectId:"{record_id}")'
         encoded_query = mh_client._encode_query_params(q=query)
         resource_path = "head_resource"
         url = f"{urljoin(mh_client.mh_api_url, resource_path)}?{encoded_query}"
@@ -95,8 +95,8 @@ class TestMediahaven:
     @responses.activate
     def test_head_400(self, mh_client):
         # Arrange
-        media_id = "1"
-        query = f'(MediaObjectId:"{media_id}")'
+        record_id = "1"
+        query = f'(MediaObjectId:"{record_id}")'
         encoded_query = mh_client._encode_query_params(q=query)
         resource_path = "head_resource/"
         url = f"{urljoin(mh_client.mh_api_url, resource_path)}?{encoded_query}"
@@ -118,8 +118,8 @@ class TestMediahaven:
     @pytest.mark.parametrize("status,result", [(204, True), (200, False)])
     def test_delete(self, mh_client, status, result):
         # Arrange
-        media_id = "1"
-        resource_path = f"delete_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"delete_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
         responses.delete(
             url,
@@ -142,8 +142,8 @@ class TestMediahaven:
     @responses.activate
     def test_delete_404(self, mh_client):
         # Arrange
-        media_id = "1"
-        resource_path = f"delete_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"delete_resource/{record_id}"
         resp_json = {"error": "not found"}
         url = urljoin(mh_client.mh_api_url, resource_path)
         responses.delete(
@@ -171,28 +171,30 @@ class TestMediahaven:
     @pytest.mark.parametrize(
         "status",
         [
-            204,
             200,
+            201,
+            202,
+            203,
+            205,
+            206,
         ],
     )
     def test_post_json(self, mh_client, status):
         # Arrange
-        media_id = "1"
-        resource_path = f"post_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"post_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = {"description": "New description"}
+        response = {"recordId": 1}
 
-        responses.post(
-            url,
-            status=status,
-        )
+        responses.post(url, status=status, body=json.dumps(response))
 
         # Act
         resp = mh_client._post(resource_path, json=payload)
 
         # Assert
-        assert resp is True
+        assert resp == response
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "POST"
         assert responses.calls[0].request.headers["Content-Type"] == "application/json"
@@ -201,31 +203,60 @@ class TestMediahaven:
         assert responses.calls[0].response.status_code == status
 
     @responses.activate
+    def test_post_json_empty_response_body(self, mh_client):
+        # Arrange
+        record_id = "1"
+        resource_path = f"post_resource/{record_id}"
+        url = urljoin(mh_client.mh_api_url, resource_path)
+
+        payload = {"description": "New description"}
+
+        responses.post(url, status=204)
+
+        # Act
+        resp = mh_client._post(resource_path, json=payload)
+
+        # Assert
+        assert resp is None
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.method == "POST"
+        assert responses.calls[0].request.headers["Content-Type"] == "application/json"
+        assert responses.calls[0].request.url == url
+        assert responses.calls[0].request.body.decode("utf8") == json.dumps(payload)
+        assert responses.calls[0].response.status_code == 204
+
+    @responses.activate
     @pytest.mark.parametrize(
         "status",
         [
-            204,
             200,
+            201,
+            202,
+            203,
+            205,
+            206,
         ],
     )
     def test_post_xml(self, mh_client, status):
         # Arrange
-        media_id = "1"
-        resource_path = f"post_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"post_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = "<description>New description</description>"
+        response = {"recordId": 1}
 
         responses.post(
             url,
             status=status,
+            body=json.dumps(response),
         )
 
         # Act
         resp = mh_client._post(resource_path, xml=payload)
 
         # Assert
-        assert resp is True
+        assert resp == response
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "POST"
         assert responses.calls[0].request.headers["Content-Type"] == "application/xml"
@@ -234,31 +265,59 @@ class TestMediahaven:
         assert responses.calls[0].response.status_code == status
 
     @responses.activate
+    def test_post_xml_empty_response_body(self, mh_client):
+        # Arrange
+        record_id = "1"
+        resource_path = f"post_resource/{record_id}"
+        url = urljoin(mh_client.mh_api_url, resource_path)
+
+        payload = "<description>New description</description>"
+
+        responses.post(
+            url,
+            status=204,
+        )
+
+        # Act
+        resp = mh_client._post(resource_path, xml=payload)
+
+        # Assert
+        assert resp is None
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.method == "POST"
+        assert responses.calls[0].request.headers["Content-Type"] == "application/xml"
+        assert responses.calls[0].request.url == url
+        assert responses.calls[0].request.body == payload
+        assert responses.calls[0].response.status_code == 204
+
+    @responses.activate
     @pytest.mark.parametrize(
         "status",
         [
-            204,
             200,
+            201,
+            202,
+            203,
+            205,
+            206,
         ],
     )
     def test_post_form_data(self, mh_client, status):
         # Arrange
-        media_id = "1"
-        resource_path = f"post_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"post_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = {"description": "New description"}
+        response = {"recordId": 1}
 
-        responses.post(
-            url,
-            status=status,
-        )
+        responses.post(url, status=status, body=json.dumps(response))
 
         # Act
         resp = mh_client._post(resource_path, **payload)
 
         # Assert
-        assert resp is True
+        assert resp == response
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "POST"
         assert (
@@ -269,10 +328,35 @@ class TestMediahaven:
         assert responses.calls[0].response.status_code == status
 
     @responses.activate
+    def test_post_form_data_empty_response_body(self, mh_client):
+        # Arrange
+        record_id = "1"
+        resource_path = f"post_resource/{record_id}"
+        url = urljoin(mh_client.mh_api_url, resource_path)
+
+        payload = {"description": "New description"}
+
+        responses.post(url, status=204)
+
+        # Act
+        resp = mh_client._post(resource_path, **payload)
+
+        # Assert
+        assert resp is None
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.method == "POST"
+        assert (
+            "multipart/form-data" in responses.calls[0].request.headers["Content-Type"]
+        )
+        assert responses.calls[0].request.url == url
+        assert "New description" in str(responses.calls[0].request.body)
+        assert responses.calls[0].response.status_code == 204
+
+    @responses.activate
     def test_post_value_error(self, mh_client):
         # Arrange
-        media_id = "1"
-        resource_path = f"post_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"post_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload_json = {"description": "New description"}
@@ -305,8 +389,8 @@ class TestMediahaven:
     )
     def test_put_json(self, mh_client, status):
         # Arrange
-        media_id = "1"
-        resource_path = f"put_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"put_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = {"description": "New description"}
@@ -338,8 +422,8 @@ class TestMediahaven:
     )
     def test_put_xml(self, mh_client, status):
         # Arrange
-        media_id = "1"
-        resource_path = f"put_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"put_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload = "<description>New description</description>"
@@ -364,8 +448,8 @@ class TestMediahaven:
     @responses.activate
     def test_put_value_error(self, mh_client):
         # Arrange
-        media_id = "1"
-        resource_path = f"put_resource/{media_id}"
+        record_id = "1"
+        resource_path = f"put_resource/{record_id}"
         url = urljoin(mh_client.mh_api_url, resource_path)
 
         payload_json = {"description": "New description"}
@@ -383,7 +467,10 @@ class TestMediahaven:
         # Assert
         assert ve.value.args[0] == "Only one payload value is allowed (json or xml)"
 
-    @patch("requests.sessions.Session.request", side_effect=(TokenExpiredError("Token expired"), {"internal": {"test"}}))
+    @patch(
+        "requests.sessions.Session.request",
+        side_effect=(TokenExpiredError("Token expired"), {"internal": {"test"}}),
+    )
     def test_execute_request_token_expired(self, session_mock, mh_client):
         # Act
         resp = mh_client._execute_request()

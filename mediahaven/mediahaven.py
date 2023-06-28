@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Optional
 
 from requests import RequestException
+from requests.exceptions import JSONDecodeError
 from requests.models import Response
 from oauthlib.oauth2.rfc6749.errors import (
     TokenExpiredError,
@@ -229,7 +230,7 @@ class MediaHavenClient:
 
     def _post(
         self, resource_path: str, json: dict = None, xml: str = None, **form_data
-    ) -> bool:
+    ) -> Optional[dict]:
         """Execute a POST request.
 
         For some POST requests, MediaHaven allows JSON, XML or multipart/form-data.
@@ -243,7 +244,11 @@ class MediaHavenClient:
             **form_data: The payload as multipart/form-data.
 
         Returns:
-            True if successful.
+            - The requests response as a dict if the status code is in the successful
+                2xx range and the response contains a body.
+            - None if the status code is:
+              - In the successful 2xx range but no response body.
+              - Not in the successful 2xx range but also not in error range (4xx-5xx).
 
         Raises:
             MediaHavenException: If the response has a status >= 400.
@@ -279,10 +284,13 @@ class MediaHavenClient:
         self._raise_mediahaven_exception_if_needed(response)
 
         # Parse response information
-        if response.status_code in (200, 204):
-            return True
+        if response.status_code in (range(200, 207)):
+            try:
+                return response.json()
+            except JSONDecodeError:
+                return None
 
-        return False
+        return None
 
     def _put(
         self, resource_path: str, json: dict = None, xml: str = None, **form_data
