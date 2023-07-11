@@ -146,7 +146,7 @@ class MediaHavenPageObject(ABC):
         Args:
             response: The HTTP response.
             resource: The resource that executed the initial request.
-            **query_params: The optional query paramaters.
+            **query_params: The optional query parameters.
         """
         self._resource: BaseResource = resource
         self._query_params: dict = query_params

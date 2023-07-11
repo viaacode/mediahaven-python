@@ -230,7 +230,7 @@ class MediaHavenClient:
 
     def _post(
         self, resource_path: str, json: dict = None, xml: str = None, **form_data
-    ) -> Optional[dict]:
+    ) -> Union[dict, bool]:
         """Execute a POST request.
 
         For some POST requests, MediaHaven allows JSON, XML or multipart/form-data.
@@ -246,9 +246,10 @@ class MediaHavenClient:
         Returns:
             - The requests response as a dict if the status code is in the successful
                 2xx range and the response contains a body.
-            - None if the status code is:
-              - In the successful 2xx range but no response body.
-              - Not in the successful 2xx range but also not in error range (4xx-5xx).
+            - True if the status code is in the successful 2xx range but no response
+                body.
+            - False if the status code is not in the successful 2xx range but also
+                not in error range (4xx-5xx).
 
         Raises:
             MediaHavenException: If the response has a status >= 400.
@@ -288,9 +289,9 @@ class MediaHavenClient:
             try:
                 return response.json()
             except JSONDecodeError:
-                return None
+                return True
 
-        return None
+        return False
 
     def _put(
         self, resource_path: str, json: dict = None, xml: str = None, **form_data

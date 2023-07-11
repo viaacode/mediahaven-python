@@ -58,7 +58,7 @@ class Records(BaseResource):
 
         Args:
             accept_format: The "Accept" request header.
-            **query_params: The optional query paramaters:
+            **query_params: The optional query parameters:
                 query_params["q"]: Free text search string.
                 query_params["startIndex"]: Used for pagination of search results,
                     search results will be returned starting from this index.
