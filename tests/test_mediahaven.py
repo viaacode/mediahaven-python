@@ -217,7 +217,7 @@ class TestMediahaven:
         resp = mh_client._post(resource_path, json=payload)
 
         # Assert
-        assert resp is None
+        assert resp is True
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "POST"
         assert responses.calls[0].request.headers["Content-Type"] == "application/json"
@@ -282,7 +282,7 @@ class TestMediahaven:
         resp = mh_client._post(resource_path, xml=payload)
 
         # Assert
-        assert resp is None
+        assert resp is True
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "POST"
         assert responses.calls[0].request.headers["Content-Type"] == "application/xml"
@@ -342,7 +342,7 @@ class TestMediahaven:
         resp = mh_client._post(resource_path, **payload)
 
         # Assert
-        assert resp is None
+        assert resp is True
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "POST"
         assert (
