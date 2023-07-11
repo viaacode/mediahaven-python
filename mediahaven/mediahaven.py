@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 from requests import RequestException
 from requests.exceptions import JSONDecodeError
