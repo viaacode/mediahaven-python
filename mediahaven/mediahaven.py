@@ -36,6 +36,11 @@ class AcceptFormat(Enum):
     UNKNOWN = ""
 
 
+class ContentType(Enum):
+    JSON = "application/json"
+    XML = "application/xml"
+
+
 DEFAULT_ACCEPT_FORMAT = AcceptFormat.JSON
 
 
@@ -229,7 +234,12 @@ class MediaHavenClient:
         return False
 
     def _post(
-        self, resource_path: str, json: dict = None, xml: str = None, **form_data
+        self,
+        resource_path: str,
+        json: dict = None,
+        xml: str = None,
+        files: dict = None,
+        **form_data,
     ) -> Union[dict, bool]:
         """Execute a POST request.
 
@@ -241,7 +251,8 @@ class MediaHavenClient:
             resource_path: The path of the resource.
             json: The JSON payload.
             xml: The XML payload.
-            **form_data: The payload as multipart/form-data.
+            files: The files to upload. This is only used if form-data is used.
+            **form_data: The form data.
 
         Returns:
             - The requests response as a dict if the status code is in the successful
@@ -276,9 +287,10 @@ class MediaHavenClient:
                 **dict(method="POST", url=resource_url, headers=headers, data=xml)
             )
         else:
-            # Execute the request - Multipart/form-data
+            # Execute the request - Form
+            files = files if files else {}
             response = self._execute_request(
-                **dict(method="POST", url=resource_url, files=form_data)
+                **dict(method="POST", url=resource_url, files=files, data=form_data)
             )
 
         # Raise appropriate exception if HTTPError occurred

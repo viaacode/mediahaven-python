@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-from mediahaven.resources.base_resource import AcceptFormat
+from mediahaven.mediahaven import AcceptFormat, ContentType
 from mediahaven.resources.records import Records
 
 
@@ -81,7 +81,7 @@ class TestRecords:
         # Assert
         resp == records.mh_client._post.return_value
         records.mh_client._post.assert_called_once_with(
-            f"{records.name}/{record_id}", json=payload, xml=None
+            f"{records.name}/{record_id}", json=payload, xml=None, files={}
         )
 
     def test_update_xml(self, records: Records):
@@ -95,13 +95,19 @@ class TestRecords:
         # Assert
         resp == records.mh_client._post.return_value
         records.mh_client._post.assert_called_once_with(
-            f"{records.name}/{record_id}", json=None, xml=payload
+            f"{records.name}/{record_id}", json=None, xml=payload, files={}
         )
 
     def test_update_form_data(self, records: Records):
         # Arrange
         record_id = "1"
-        payload = {"description": "New description"}
+        metadata = "<metadata/>"
+        metadata_content_type = ContentType.XML.value
+        payload = {
+            "metadata": metadata,
+            "metadata_content_type": metadata_content_type,
+            "description": "New description",
+        }
 
         # Act
         resp = records.update(record_id, **payload)
@@ -109,7 +115,65 @@ class TestRecords:
         # Assert
         resp == records.mh_client._post.return_value
         records.mh_client._post.assert_called_once_with(
-            f"{records.name}/{record_id}", json=None, xml=None, **payload
+            f"{records.name}/{record_id}",
+            json=None,
+            xml=None,
+            files={"metadata": ("metadata", metadata, metadata_content_type)},
+            **{"description": "New description"},
+        )
+
+    def test_update_form_data_missing_metadata(self, records: Records):
+        # Arrange
+        record_id = "1"
+        metadata_content_type = ContentType.XML.value
+        payload = {
+            "metadata_content_type": metadata_content_type,
+            "description": "New description",
+        }
+
+        # Act
+        with pytest.raises(ValueError) as e:
+            records.update(record_id, **payload)
+
+        assert str(e.value) == "The form data needs to contain a key 'metadata'"
+
+    def test_update_form_data_missing_metadata_content_type(self, records: Records):
+        # Arrange
+        record_id = "1"
+        metadata = "<metadata/>"
+
+        payload = {
+            "metadata": metadata,
+            "description": "New description",
+        }
+
+        # Act
+        with pytest.raises(ValueError) as e:
+            records.update(record_id, **payload)
+
+        assert (
+            str(e.value)
+            == "The form data needs to contain a key 'metadata_content_type' which specifies the content-type of the metadata"
+        )
+
+    def test_update_form_data_wrong_metadata_content_type(self, records: Records):
+        # Arrange
+        record_id = "1"
+        metadata = "<metadata/>"
+        metadata_content_type = "text/plain"
+        payload = {
+            "metadata": metadata,
+            "metadata_content_type": metadata_content_type,
+            "description": "New description",
+        }
+
+        # Act
+        with pytest.raises(ValueError) as e:
+            records.update(record_id, **payload)
+
+        assert (
+            str(e.value)
+            == "The metadata_content_type' should be 'application/json' or 'application/xml'"
         )
 
     def test_publish_without_reason(self, records: Records):

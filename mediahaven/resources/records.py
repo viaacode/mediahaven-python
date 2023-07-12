@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any, Dict
-from mediahaven.mediahaven import DEFAULT_ACCEPT_FORMAT
+from mediahaven.mediahaven import ContentType, DEFAULT_ACCEPT_FORMAT
 from mediahaven.resources.base_resource import (
     BaseResource,
     MediaHavenPageObject,
@@ -103,18 +103,52 @@ class Records(BaseResource):
     def update(self, record_id: str, json: dict = None, xml: str = None, **form_data):
         """Update a record.
 
+        The payload is a MediaHaven record update object. The object can be in the
+        form of JSON, XML or form-data. In the case of passing form-data, the
+        parameters metadata and content_type_metadata are mandatory. The latter
+        specifies the content-type of the former.
+
         Args:
-            record_id: The ID of the record to remove.
+            record_id: The ID of the record to update.
                 It can be either a MediaObjectId, FragmentId or RecordId.
             json: The JSON payload.
             xml: The XML payload.
-            **form_data: The payload as multipart/form-data.
+            **form_data: The payload as form-data.
+
+        Raises:
+            ValueError: In the case that form_data is passed, if:
+              - The parameter 'metadata' is not passed;
+              - The parameter 'metadata_content_type' is not passed;
+              - The parameter 'metadata_content_type' contains a different value
+                  than "application/json" or "application/xml".
         """
+
+        files = {}
+        if form_data:
+            try:
+                metadata = form_data.pop("metadata")
+            except KeyError:
+                raise ValueError("The form data needs to contain a key 'metadata'")
+            try:
+                metadata_content_type = form_data.pop("metadata_content_type")
+            except KeyError:
+                raise ValueError(
+                    "The form data needs to contain a key 'metadata_content_type' which specifies the content-type of the metadata"
+                )
+            if metadata_content_type not in (
+                ContentType.JSON.value,
+                ContentType.XML.value,
+            ):
+                raise ValueError(
+                    f"The metadata_content_type' should be '{ContentType.JSON.value}' or '{ContentType.XML.value}'"
+                )
+            files = {"metadata": ("metadata", metadata, metadata_content_type)}
 
         return self.mh_client._post(
             self._construct_path(record_id),
             json=json,
             xml=xml,
+            files=files,
             **form_data,
         )
 
