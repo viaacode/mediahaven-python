@@ -236,12 +236,13 @@ class TestRecords:
             },
         )
 
-    def test_create_fragment_frames(self, records: Records):
+    @pytest.mark.parametrize("start_frames,end_frames", [(5, 10), (0, 0)])
+    def test_create_fragment_frames(
+        self, start_frames: int, end_frames: int, records: Records
+    ):
         # Arrange
         record_id = "1"
         title = "Title"
-        start_frames = 5
-        end_frames = 10
         # Act
         resp = records.create_fragment(
             record_id, title, start_frames=start_frames, end_frames=end_frames
@@ -257,8 +258,8 @@ class TestRecords:
                 "Publish": True,
                 "Fragment": {
                     "ParentRecordId": "1",
-                    "FragmentStartFrames": 5,
-                    "FragmentEndFrames": 10,
+                    "FragmentStartFrames": start_frames,
+                    "FragmentEndFrames": end_frames,
                 },
             },
         )
