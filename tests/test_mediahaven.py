@@ -9,7 +9,12 @@ from oauthlib.oauth2.rfc6749.errors import (
 from requests import RequestException
 from urllib.parse import urljoin
 
-from mediahaven.mediahaven import AcceptFormat, MediaHavenClient, MediaHavenException
+from mediahaven.mediahaven import (
+    AcceptFormat,
+    ContentType,
+    MediaHavenClient,
+    MediaHavenException,
+)
 
 
 class TestMediahaven:
@@ -314,7 +319,11 @@ class TestMediahaven:
         responses.post(url, status=status, body=json.dumps(response))
 
         # Act
-        resp = mh_client._post(resource_path, **payload)
+        resp = mh_client._post(
+            resource_path,
+            files={"metadata": ("metadata", "<metadata/>", ContentType.XML.value)},
+            **payload,
+        )
 
         # Assert
         assert resp == response
@@ -339,7 +348,11 @@ class TestMediahaven:
         responses.post(url, status=204)
 
         # Act
-        resp = mh_client._post(resource_path, **payload)
+        resp = mh_client._post(
+            resource_path,
+            files={"metadata": ("metadata", "<metadata/>", ContentType.XML.value)},
+            **payload,
+        )
 
         # Assert
         assert resp is True
