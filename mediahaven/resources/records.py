@@ -109,7 +109,7 @@ class Records(BaseResource):
         specifies the content-type of the former.
 
         Args:
-            record_id: The ID of the record to remove.
+            record_id: The ID of the record to update.
                 It can be either a MediaObjectId, FragmentId or RecordId.
             json: The JSON payload.
             xml: The XML payload.
