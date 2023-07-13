@@ -236,12 +236,13 @@ class TestRecords:
             },
         )
 
-    def test_create_fragment_frames(self, records: Records):
+    @pytest.mark.parametrize("start_frames,end_frames", [(5, 10), (0, 0)])
+    def test_create_fragment_frames(
+        self, start_frames: int, end_frames: int, records: Records
+    ):
         # Arrange
         record_id = "1"
         title = "Title"
-        start_frames = 5
-        end_frames = 10
         # Act
         resp = records.create_fragment(
             record_id, title, start_frames=start_frames, end_frames=end_frames
@@ -257,8 +258,8 @@ class TestRecords:
                 "Publish": True,
                 "Fragment": {
                     "ParentRecordId": "1",
-                    "FragmentStartFrames": 5,
-                    "FragmentEndFrames": 10,
+                    "FragmentStartFrames": start_frames,
+                    "FragmentEndFrames": end_frames,
                 },
             },
         )
@@ -278,13 +279,15 @@ class TestRecords:
             == "Provide either a combination of start_time_code and end_time_code or start_frames and end_frames."
         )
 
-    def test_create_fragment_value_mixed(self, records: Records):
+    @pytest.mark.parametrize(
+        "start_time_code,end_frames", [("00:01:00.000", 5), ("00:01:00.000", 0)]
+    )
+    def test_create_fragment_value_mixed(
+        self, start_time_code, end_frames, records: Records
+    ):
         # Arrange
         record_id = "1"
         title = "Title"
-        start_time_code = "00:01:00.000"
-        end_frames = 5
-
         # Act
         with pytest.raises(ValueError) as error:
             records.create_fragment(

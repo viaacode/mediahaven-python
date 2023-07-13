@@ -204,14 +204,16 @@ class Records(BaseResource):
         }
 
         # Add the timecodes or frames
-        if (start_time_code or end_time_code) and (start_frames or end_frames):
+        if (start_time_code or end_time_code) and (
+            start_frames is not None or end_frames is not None
+        ):
             raise ValueError(
                 "Provide either a combination of start_time_code and end_time_code or start_frames and end_frames."
             )
         elif start_time_code and end_time_code:
             json["Fragment"]["FragmentStartTimeCode"] = start_time_code
             json["Fragment"]["FragmentEndTimeCode"] = end_time_code
-        elif start_frames and end_frames:
+        elif start_frames is not None and end_frames is not None:
             json["Fragment"]["FragmentStartFrames"] = start_frames
             json["Fragment"]["FragmentEndFrames"] = end_frames
         else:
