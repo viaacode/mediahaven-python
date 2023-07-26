@@ -95,6 +95,12 @@ class MediaHavenSingleObjectJSON(MediaHavenSingleObject):
         return getattr(self.single_result, attr)
 
 
+class MediaHavenSingleObjectXML(MediaHavenSingleObject):
+    def __init__(self, response: Response):
+        super().__init__(response)
+        self._single_result = response.text
+
+
 class MediaHavenSingleObjectCreator:
     """Factory class for creating an object which is a subclass of MediaHavenSingleObject."""
 
@@ -108,13 +114,11 @@ class MediaHavenSingleObjectCreator:
             response: The HTTP response.
         Returns:
             The MediaHavenSingleObject.
-        Raises:
-            NotImplementedError: When passing an XML format.
         """
         if accept_format == AcceptFormat.JSON:
             return MediaHavenSingleObjectJSON(response)
         else:
-            raise NotImplementedError("XML format is not yet implemented")
+            return MediaHavenSingleObjectXML(response)
 
 
 class NoMorePagesException(Exception):

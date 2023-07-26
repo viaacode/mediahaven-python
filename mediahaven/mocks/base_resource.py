@@ -5,6 +5,7 @@ from typing import List
 from mediahaven.resources.base_resource import (
     MediaHavenPageObjectJSON,
     MediaHavenSingleObjectJSON,
+    MediaHavenSingleObjectXML,
 )
 
 
@@ -40,3 +41,8 @@ class MediaHavenPageObjectJSONMock(MediaHavenPageObjectJSON):
         self._has_more = self.total_nr_of_results > (
             self.nr_of_results + self.start_index
         )
+
+
+class MediaHavenSingleObjectXMLMock(MediaHavenSingleObjectXML):
+    def __init__(self, data: str):
+        self._single_result = data
