@@ -1,6 +1,11 @@
+from pathlib import Path
+
+import pytest
+
 from mediahaven.mocks.base_resource import (
     MediaHavenPageObjectJSONMock,
     MediaHavenSingleObjectJSONMock,
+    MediaHavenSingleObjectXMLMock,
 )
 
 
@@ -19,3 +24,13 @@ def test_media_haven_page_object_json_mock():
     assert page_object_mock.nr_of_results == 5
     assert page_object_mock.total_nr_of_results == 10
     assert page_object_mock.start_index == 3
+
+
+@pytest.fixture
+def mh_single_object_xml():
+    return Path("tests", "resources", "mh_single_object.xml").read_text()
+
+
+def test_media_haven_single_object_xml_mock(mh_single_object_xml):
+    single_object_mock = MediaHavenSingleObjectXMLMock(mh_single_object_xml)
+    assert single_object_mock.single_result == mh_single_object_xml
