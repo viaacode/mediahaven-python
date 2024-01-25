@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mhs:Sidecar
+    xmlns:mh="https://zeticon.mediahaven.com/metadata/23.1/mh/"
+    xmlns:mhs="https://zeticon.mediahaven.com/metadata/23.1/mhs/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="23.1"
+    xsi:schemaLocation="https://zeticon.mediahaven.com/metadata/23.1/mhs/ https://zeticon.mediahaven.com/metadata/23.1/mhs.xsd
+                        https://zeticon.mediahaven.com/metadata/23.1/mh/ https://zeticon.mediahaven.com/metadata/23.1/mh.xsd">
+    <mhs:Descriptive />
+    <mhs:Administrative />
+    <mhs:Technical />
+    <mhs:Internal />
+    <mhs:Structural />
+    <mhs:RightsManagement />
+    <mhs:Dynamic />
+</mhs:Sidecar>
