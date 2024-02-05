@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="mediahaven",
-    version="0.4.3",
+    version="0.5.0",
     license="GPL",
     author="Mattias",
     author_email="mattias.poppe@meemoo.be",
