@@ -4,6 +4,10 @@
 
 The Mediahaven Python library provides a way to communicate with MediaHaven via the v2 REST API.
 
+## Documentation
+
+For more information about the internals of this library: see the automatically generated [documentation](/docs/README.md).
+
 ## Usage
 
 ```python
