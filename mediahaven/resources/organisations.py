@@ -37,6 +37,24 @@ class Organisations(BaseResource):
         )
         return MediaHavenSingleObjectCreator.create_object(response, accept_format)
 
+    def get_by_external_id(
+        self,
+        external_id: str,
+        accept_format=DEFAULT_ACCEPT_FORMAT,
+    ) -> MediaHavenSingleObject:
+        """Get a single organisation.
+        Args:
+            external_id: The ExternalId of an organisation.
+            accept_format: The "Accept" request header.
+        Returns:
+            A single organisation.
+        """
+        response = self.mh_client._get(
+            self._construct_path(f"ExternalId:{external_id}"),
+            accept_format,
+        )
+        return MediaHavenSingleObjectCreator.create_object(response, accept_format)
+
     def search(
         self, accept_format: str = DEFAULT_ACCEPT_FORMAT, **query_params
     ) -> MediaHavenPageObject:
