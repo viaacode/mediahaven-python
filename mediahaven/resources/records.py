@@ -12,6 +12,9 @@ from mediahaven.resources.base_resource import (
 )
 
 
+DEFAULT_ZONE_NAME = "MediaHaven 2.0 Concepts"
+
+
 class Records(BaseResource):
     """Public API endpoint of a MediaHaven record."""
 
@@ -225,3 +228,100 @@ class Records(BaseResource):
             self._construct_path(),
             json=json,
         )
+
+    def upload_single_file_via_url(
+        self,
+        url: str,
+        metadata: str,
+        metadata_content_type: ContentType,
+        **kwargs,
+    ):
+        """Upload a file via the Upload URL File request.
+
+        This creates one record/object in MediaHaven.
+
+        The metadata as sidecar is mandatory as well as the metadata content-type.
+
+        The file will be set to "Published" after ingest.
+
+        Args:
+            url: The URL where to find the file.
+            metadata: The metadata as sidecar.
+            metadata_content_type: Specifies the content-type of the metadata sidecar.
+            **kwargs: Other kwargs to pass.
+
+        Raises:
+            ValueError: In the case that metadata is passed, if:
+              - The parameter 'metadata_content_type' contains a different value
+                  than "ContentType.JSON" or "ContentType.XML".
+        """
+        if metadata_content_type not in (
+            ContentType.JSON,
+            ContentType.XML,
+        ):
+            raise ValueError(
+                f"The metadata_content_type' should be '{ContentType.JSON}' or '{ContentType.XML}'"
+            )
+        files = {"metadata": ("metadata", metadata, metadata_content_type.value)}
+
+        return self.mh_client._post(
+            self._construct_path(),
+            fileUrl=url,
+            publish=True,
+            files=files,
+            **kwargs,
+        )
+
+    def _encode_text_part(self, part: str | bool) -> tuple[None, str | bool]:
+        return (None, part)
+
+    def upload_complex_file_via_url(
+        self,
+        url: str,
+        zone: str = DEFAULT_ZONE_NAME,
+        ingest_space_id: str = None,
+        record_type: str = "Sip",
+        **kwargs,
+    ):
+        """Upload a MH2.0 complex file via the Upload URL File request.
+
+        This creates one or more records/objects in MediaHaven. This depends
+        on the amount of records in the (METS of the) complex file.
+
+        The complex file will not be (auto-)published after ingest. This means that the
+        zone or ingest space in which the file needs to be uploaded, should be defined.
+        Do note that they are mutually exclusive. If you pass the `ingest_space_id`,
+        that will be used in the request. Otherwise, the (default) value of `zone`
+        will be used.
+
+        Args:
+            url: The URL where to find the file.
+            zone_name: The ID or the name of the zone in which the file has to be uploaded,
+            ingest_space_id: The ID of the ingest space in which the file has to be uploaded.
+            record_type: The MH2.0 record type.
+            **kwargs: Other kwargs to pass.
+        """
+
+        # The request payload MUST be encoded as "Multipart/form-data" and not
+        # "application/x-www-form-urlencoded". As we don't send a file in the payload
+        # for a complex zip upload, enforce this by encoding every form part
+        # separately as a text part by passing them as a files dict in the requests
+        # call.
+
+        files = {
+            "fileUrl": self._encode_text_part(url),
+            "recordType": self._encode_text_part(record_type),
+            "publish": self._encode_text_part(False),
+        }
+
+        # Pass ingest space or zone
+        if ingest_space_id:
+            files["ingestSpaceId"] = self._encode_text_part(ingest_space_id)
+        else:
+            files["zone"] = self._encode_text_part(zone)
+
+        # Pass extra kwargs
+        for key, val in kwargs.items():
+            files[key] = self._encode_text_part(val)
+
+        return self.mh_client._post(self._construct_path(), files=files)
