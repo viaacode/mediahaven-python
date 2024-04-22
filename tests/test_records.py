@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 
 from mediahaven.mediahaven import AcceptFormat, ContentType
-from mediahaven.resources.records import Records
+from mediahaven.resources.records import Records, DEFAULT_ZONE_NAME
 
 
 class TestRecords:
@@ -314,4 +314,73 @@ class TestRecords:
         assert (
             str(error.value)
             == "Provide either a combination of start_time_code and end_time_code or start_frames and end_frames."
+        )
+
+    def test_upload_single_file_via_url(self, records: Records):
+        # Arrange
+        file_url = "url"
+        metadata = "<metadata/>"
+        metadata_content_type = ContentType.XML
+        extra_kwargs = {
+            "workflow": "ingest-2.0",
+        }
+
+        # Act
+        resp = records.upload_single_file_via_url(
+            file_url, metadata, metadata_content_type, **extra_kwargs
+        )
+
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            records.name,
+            fileUrl=file_url,
+            publish=True,
+            files={"metadata": ("metadata", metadata, metadata_content_type.value)},
+            **extra_kwargs,
+        )
+
+    def test_upload_complex_file_via_url(self, records: Records):
+        # Arrange
+        file_url = "url"
+        extra_kwargs = {
+            "workflow": "ingest-2.0",
+        }
+
+        # Act
+        resp = records.upload_complex_file_via_url(file_url, **extra_kwargs)
+
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            records.name,
+            files={
+                "fileUrl": (None, file_url),
+                "recordType": (None, "Sip"),
+                "publish": (None, False),
+                "zone": (None, DEFAULT_ZONE_NAME),
+                "workflow": (None, "ingest-2.0"),
+            },
+        )
+
+    def test_upload_complex_file_via_url_ingest_space(self, records: Records):
+        # Arrange
+        file_url = "url"
+        ingest_space_id = "1"
+
+        # Act
+        resp = records.upload_complex_file_via_url(
+            file_url, ingest_space_id=ingest_space_id
+        )
+
+        # Assert
+        resp == records.mh_client._post.return_value
+        records.mh_client._post.assert_called_once_with(
+            records.name,
+            files={
+                "fileUrl": (None, file_url),
+                "recordType": (None, "Sip"),
+                "publish": (None, False),
+                "ingestSpaceId": (None, ingest_space_id),
+            },
         )

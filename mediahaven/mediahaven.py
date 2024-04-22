@@ -267,7 +267,7 @@ class MediaHavenClient:
             ValueError: If multiple payload values are passed (json, xml or form_data).
         """
         # Check if only one payload value is passed
-        if bool(json) + bool(xml) + bool(form_data) != 1:
+        if bool(json) + bool(xml) + (bool(files) or bool(form_data)) != 1:
             raise ValueError(
                 "Only one payload value is allowed (json, xml or form_data)"
             )
@@ -288,9 +288,11 @@ class MediaHavenClient:
             )
         else:
             # Execute the request - Form
-            files = files if files else {}
+            files_to_send = files if files else {}
             response = self._execute_request(
-                **dict(method="POST", url=resource_url, files=files, data=form_data)
+                **dict(
+                    method="POST", url=resource_url, files=files_to_send, data=form_data
+                )
             )
 
         # Raise appropriate exception if HTTPError occurred
