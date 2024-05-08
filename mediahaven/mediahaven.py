@@ -18,6 +18,7 @@ from mediahaven.oauth2 import (
     OAuth2Grant,
     RefreshTokenError,
 )
+from mediahaven.retry import RetryException, retry_exponential, TooManyRetriesException
 
 API_PATH = "/mediahaven-rest-api/v2/"
 
@@ -45,12 +46,29 @@ DEFAULT_ACCEPT_FORMAT = AcceptFormat.JSON
 
 
 class MediaHavenClient:
-    """The MediaHaven client class to communicate with MediaHaven."""
+    """The MediaHaven client class to communicate with MediaHaven.
 
-    def __init__(self, mh_base_url: str, grant: OAuth2Grant):
+    Attributes:
+        - grant: The OAuth2.0 grant.
+        - mh_base_url: The MediaHaven base URL (https://{host}:{port}).
+        - mh_api_url: The mh_base_url concatenated with the API path including the version.
+        - retry_rate_limit: Indicates if when hitting a rate limit, the request should be retried.
+    """
+
+    def __init__(
+        self, mh_base_url: str, grant: OAuth2Grant, retry_rate_limit: bool = False
+    ):
+        """Initialize a MediaHaven client.
+
+        Args:
+            - mh_base_url:  The MediaHaven base URL (https://{host}:{port}).
+            - grant: The OAuth2.0 grant.
+            - retry_rate_limit: Indicates if, when hitting a rate limit, the request should be retried.
+        """
         self.grant = grant
         self.mh_base_url = mh_base_url
         self.mh_api_url = urljoin(self.mh_base_url, API_PATH)
+        self.retry_rate_limit = retry_rate_limit
 
     def _raise_mediahaven_exception_if_needed(self, response):
         """Raise a MediaHaven exception if the response status >= 400.
@@ -69,6 +87,7 @@ class MediaHavenClient:
                 error_message = {"response": response.text}
             raise MediaHavenException(error_message, status_code=response.status_code)
 
+    @retry_exponential((RetryException), 1, 2, 10)
     def _execute_request(self, **kwargs):
         """Execute an authorized request.
 
@@ -86,6 +105,7 @@ class MediaHavenClient:
             NoTokenError: If a token has not yet been requested.
             RefreshTokenError: If an error occurred when refreshing the token.
             requests.RequestException: Reraise if a RequestException happen.
+            TooManyRetriesException: If all the (re)tries have been exhausted.
         """
         # Get a session with a valid auth
         try:
@@ -110,7 +130,11 @@ class MediaHavenClient:
                 return response
         except RequestException:
             raise
+        except TooManyRetriesException:
+            raise
         else:
+            if self.retry_rate_limit and response.status_code == 429:
+                raise RetryException
             return response
 
     def _build_headers(self, accept_format: AcceptFormat = None) -> dict:
