@@ -37,13 +37,24 @@ class Records(BaseResource):
         )
 
     def get(
-        self, record_id: str, accept_format=DEFAULT_ACCEPT_FORMAT
+        self,
+        record_id: str,
+        accept_format=DEFAULT_ACCEPT_FORMAT,
+        include_deleted=False,
+        **query_params,
     ) -> MediaHavenSingleObject:
         """Get a single record.
 
         Args:
             record_id: It can either be a MediaObjectId, FragmentId or RecordId.
             accept_format: The "Accept" request header.
+            include_deleted: If true, also return the record if it has been
+                logically deleted.
+            **query_params: Further optional query parameters:
+                query_params["fields"]: (array) Currently only supports "Exif"
+                    value.  If provided, Exif field is added to Technical-family.
+                    If the record has record structure Data, the information is
+                    obtained from the original representation.
 
         Returns:
             A single record.
@@ -51,6 +62,8 @@ class Records(BaseResource):
         response = self.mh_client._get(
             self._construct_path(record_id),
             accept_format,
+            includeDeleted=str(include_deleted).lower(),
+            **query_params,
         )
         return MediaHavenSingleObjectCreator.create_object(response, accept_format)
 
