@@ -21,7 +21,24 @@ class TestRecords:
 
         # Assert
         mh_client_mock._get.assert_called_once_with(
-            f"{records.name}/{record_id}", AcceptFormat.JSON
+            f"{records.name}/{record_id}", AcceptFormat.JSON, includeDeleted="false"
+        )
+        object_creator_mock.create_object.assert_called_once_with(
+            mh_client_mock._get(), AcceptFormat.JSON
+        )
+
+    @patch("mediahaven.resources.records.MediaHavenSingleObjectCreator")
+    def test_get_with_include_deleted(self, object_creator_mock, records: Records):
+        # Arrange
+        record_id = "1"
+        mh_client_mock = records.mh_client
+
+        # Act
+        records.get(record_id, include_deleted=True)
+
+        # Assert
+        mh_client_mock._get.assert_called_once_with(
+            f"{records.name}/{record_id}", AcceptFormat.JSON, includeDeleted="true"
         )
         object_creator_mock.create_object.assert_called_once_with(
             mh_client_mock._get(), AcceptFormat.JSON
