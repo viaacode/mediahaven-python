@@ -10,6 +10,7 @@ from requests.models import Response
 from oauthlib.oauth2.rfc6749.errors import (
     TokenExpiredError,
     InvalidGrantError,
+    InvalidClientIdError,
 )
 from urllib.parse import urlencode, urljoin, quote as urlquote
 
@@ -102,10 +103,10 @@ class MediaHavenClient:
                 self.grant.refresh_token()
                 session = self.grant._get_session()
                 response = session.request(**kwargs)
-            except InvalidGrantError:
+            except (InvalidGrantError, InvalidClientIdError) as e:
                 # Refresh token invalid / revoked
                 # Depending on grant, different action is needed
-                raise RefreshTokenError
+                raise RefreshTokenError from e
             else:
                 return response
         except RequestException:
