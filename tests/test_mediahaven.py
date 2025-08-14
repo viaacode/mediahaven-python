@@ -5,6 +5,8 @@ import pytest
 import responses
 from oauthlib.oauth2.rfc6749.errors import (
     TokenExpiredError,
+    InvalidGrantError,
+    InvalidClientIdError,
 )
 from requests import RequestException
 from urllib.parse import urljoin
@@ -14,6 +16,7 @@ from mediahaven.mediahaven import (
     ContentType,
     MediaHavenClient,
     MediaHavenException,
+    RefreshTokenError,
 )
 
 
@@ -491,6 +494,27 @@ class TestMediahaven:
         # Assert
         assert session_mock.call_count == 2
         assert resp == {"internal": {"test"}}
+
+    @patch(
+        "requests.sessions.Session.request",
+    )
+    @pytest.mark.parametrize(
+        "refresh_error",
+        [InvalidGrantError, InvalidClientIdError],
+    )
+    def test_execute_request_refresh_token_expired(
+        self, session_mock, refresh_error, mh_client
+    ):
+        # Arrange
+        session_mock.side_effect = (TokenExpiredError("Token expired"), refresh_error)
+
+        # Act
+        with pytest.raises(RefreshTokenError) as e_info:
+            mh_client._execute_request()
+
+        # Assert
+        assert session_mock.call_count == 2
+        assert e_info.typename == "RefreshTokenError"
 
     @patch("requests.sessions.Session.request", side_effect=RequestException)
     def test_execute_request_exception(self, session_mock, mh_client):
